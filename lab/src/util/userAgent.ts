@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { USER_AGENT_CHROME } from './configs';
+import { USER_AGENT_CHROME } from './config';
 
 const instance = axios.create({
     baseURL: 'https://www.whatismybrowser.com/detect/what-is-my-user-agent',
