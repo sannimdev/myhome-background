@@ -1,3 +1,8 @@
-import { testMakeObject } from './utils/makeObject';
+import { testLand } from './util/land';
 
-testMakeObject();
+async function run() {
+    const data = await testLand();
+    console.log(data);
+}
+
+run();
