@@ -1,0 +1,26 @@
+name: 새로 올라온 방 정보 탐색하기
+on:
+    push:
+        branches:
+            - master
+    schedule:
+        # 20시 (GitHub Action은 UTC 타임존)
+        - cron: '30 11  * * *'
+jobs:
+    fetch:
+        name: Fetch
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@master
+            - name: Use Node.js 14.x
+              uses: actions/setup-node@v1
+              with:
+                  node-version: 14.x
+            - name: 방 정보 탐색하기
+              run: |
+                  npm ci
+                  npm run fetch
+              env:
+                  MONGODB_NAME: ${{ secrets.MONGODB_NAME }}
+                  MONGODB_ID: ${{ secrets.MONGODB_ID }}
+                  MONGODB:PASSWORD: ${{ secrets.MONGODB_PASSWORD }}
