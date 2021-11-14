@@ -2,7 +2,7 @@ name: 새로 올라온 방 정보 탐색하기
 on:
     push:
         branches:
-            - master
+            - 19-github-actions
     schedule:
         # 20시 (GitHub Action은 UTC 타임존)
         - cron: '30 11  * * *'
@@ -23,4 +23,4 @@ jobs:
               env:
                   MONGODB_NAME: ${{ secrets.MONGODB_NAME }}
                   MONGODB_ID: ${{ secrets.MONGODB_ID }}
-                  MONGODB:PASSWORD: ${{ secrets.MONGODB_PASSWORD }}
+                  MONGODB_PW: ${{ secrets.MONGODB_PW }}
