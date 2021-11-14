@@ -2,7 +2,7 @@ name: 새로 올라온 방 정보 탐색하기
 on:
     push:
         branches:
-            - 19-github-actions
+            - master
     schedule:
         # 20시 (GitHub Action은 UTC 타임존)
         - cron: '30 11  * * *'
