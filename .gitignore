@@ -137,3 +137,4 @@ dist
 # Custom
 
 **/output/**
+**/ignore/**
