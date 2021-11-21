@@ -23,7 +23,7 @@ const commonFilter: CommonSearchRequest = {
     maxMaintenanceCost: '',
 };
 
-export const requestParam: SearchRequest = {
+export const requestParamForComplex: SearchRequest = {
     ...commonFilter,
     cortarNo: '4113510200', // 구역 번호 (수내동, 정자동:4113510300)
     zoom: '15',
@@ -39,4 +39,37 @@ export const requestParam: SearchRequest = {
     rightLon: '127.1630752',
     topLat: '37.3958794',
     bottomLat: '37.3737147',
+};
+
+export const requestParamForVilla: SearchRequest = {
+    areaMax: '900000000',
+    areaMin: '0',
+    bottomLat: '37.3534067',
+    cortarNo: '4113510200',
+    directions: '',
+    fakeComplexMarker: null,
+    leftLon: '127.132611190625',
+    markerId: null,
+    markerType: null,
+    maxHouseHoldCount: null,
+    maxMaintenanceCost: null,
+    minHouseHoldCount: null,
+    minMaintenanceCost: null,
+    oldBuildYears: null,
+    priceMax: '20000',
+    priceMin: '10000',
+    priceType: 'RETAIL',
+    realEstateType: 'VL:DDDGG:JWJT:SGJT:HOJT',
+    recentlyBuildYears: null,
+    rentPriceMax: '900000000',
+    rentPriceMin: '0',
+    rightLon: '127.1559266',
+    sameAddressGroup: 'false',
+    selectedComplexBuildingNo: null,
+    selectedComplexNo: null,
+    showArticle: 'false',
+    tag: '::::::::',
+    topLat: '37.360585799999996',
+    tradeType: 'B1',
+    zoom: '15',
 };
