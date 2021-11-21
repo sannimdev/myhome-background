@@ -11,7 +11,7 @@ const instance = axios.create({
 export async function testLand() {
     try {
         const response: AxiosResponse<Room[]> = await instance.get('', { params: requestParam });
-        return response.data;
+        return response.data.map((item) => ({ ...item, createdAt: new Date() }));
     } catch (e) {
         console.error('testLand:', e);
     }

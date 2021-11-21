@@ -23,6 +23,6 @@ export async function addDocument(collectionName: string, elements: any[]) {
         const insertResult = await collection.insertMany(elements);
         return insertResult;
     } catch (e) {
-        console.error(e);
+        console.error('add Document', e);
     }
 }
