@@ -76,3 +76,8 @@ export interface Room {
     totalArticleCount: number;
     existPriceTab: boolean;
 }
+
+// 파싱한 시각 기록하기 (nullable)
+export interface Room {
+    createdAt?: Date;
+}
