@@ -8,24 +8,24 @@ export interface CommonSearchRequest {
     priceMax: string;
     areaMin: string;
     areaMax: string;
-    oldBuildYears: string;
-    recentlyBuildYears: string;
-    minHouseHoldCount: string;
-    maxHouseHoldCount: string;
+    oldBuildYears: string | null;
+    recentlyBuildYears: string | null;
+    minHouseHoldCount: string | null;
+    maxHouseHoldCount: string | null;
     showArticle: string;
-    minMaintenanceCost: string;
-    maxMaintenanceCost: string;
+    minMaintenanceCost: string | null;
+    maxMaintenanceCost: string | null;
 }
 
 export interface SearchRequest extends CommonSearchRequest {
     cortarNo: string;
     zoom: string;
     priceType: string;
-    markerId: string;
-    markerType: string;
-    selectedComplexNo: string;
-    selectedComplexBuildingNo: string;
-    fakeComplexMarker: string;
+    markerId: string | null;
+    markerType: string | null;
+    selectedComplexNo: string | null;
+    selectedComplexBuildingNo: string | null;
+    fakeComplexMarker: string | null;
     sameAddressGroup: string;
     directions: string;
     leftLon: string;
