@@ -1,4 +1,4 @@
-import { testComplex, testVilla } from './land';
+import { getNaverLandToken, testComplex, testVilla } from './land';
 import { Room } from './type/land';
 // import { saveFile } from './lib/file';
 import { addDocument } from './lib/mongo';
@@ -9,7 +9,9 @@ async function run() {
     // await saveFile(`${Date.now()}-houses.json`, JSON.stringify(houses, null, 4));
     // const result = Array.isArray(houses) && (await addDocument('villa', houses));
     // console.log(result);
+
     ///////////////////////////////////////////////////////////////////////////////////
+    // const NAVER_TOKEN = await getNaverLandToken();
     const houses = await Promise.allSettled([testComplex(), testVilla()]);
     const fulfilled = houses.filter(
         ({ status }) => status === 'fulfilled'
