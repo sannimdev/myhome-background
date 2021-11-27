@@ -1,7 +1,7 @@
 import axios, { AxiosResponse } from 'axios';
 import { requestParamForComplex, requestParamForVilla } from './data/request';
 import { Room, SearchRequest } from './type/land';
-import { COMPLEX_BASE_URL, VILLA_BASE_URL, USER_AGENT_CHROME } from './util/config';
+import { COMPLEX_BASE_URL, VILLA_BASE_URL, USER_AGENT_CHROME, NAVER_LAND_URL } from './util/config';
 
 const headers = { 'User-Agent': USER_AGENT_CHROME };
 export async function getLand(url: string, params: SearchRequest) {
@@ -10,6 +10,19 @@ export async function getLand(url: string, params: SearchRequest) {
         return response.data.map((item) => ({ ...item, createdAt: new Date() }));
     } catch (e) {
         throw e;
+    }
+}
+
+export async function getNaverLandToken() {
+    try {
+        const response = await axios.get(NAVER_LAND_URL);
+        const html = String(response.data).replace(/ /gi, '');
+        const token = `"token":{"token":"`;
+        const tokenStart = html.search(new RegExp(token)) + token.length;
+        const tokenEnd = tokenStart + html.substring(tokenStart).indexOf(`"`);
+        return html.substring(tokenStart, tokenEnd);
+    } catch (e) {
+        console.error('getNaverLandToken', e);
     }
 }
 
