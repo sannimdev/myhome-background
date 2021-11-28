@@ -3,6 +3,7 @@ on:
     push:
         branches:
             - master
+            - test-actions
     schedule:
         # 20시 (GitHub Action은 UTC 타임존)
         - cron: '30 11  * * *'
