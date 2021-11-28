@@ -4,7 +4,7 @@ export const USER_AGENT_CHROME =
 export const NAVER_LAND_URL = 'https://new.land.naver.com';
 export const COMPLEX_BASE_URL = 'https://new.land.naver.com/api/complexes/single-markers/2.0';
 export const VILLA_BASE_URL = 'https://new.land.naver.com/api/articles/clusters';
-export const ONE_TWO_ROOM_BASE_URL = 'https://new.land.naver.com/api/articles';
+export const ONE_TWO_ROOM_BASE_URL = 'https://m.land.naver.com/cluster/ajax/articleList';
 
 export const OVERVIEW_IMAGE_URL = 'https://landthumb-phinf.pstatic.net/';
 
