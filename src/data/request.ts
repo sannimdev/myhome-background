@@ -2,7 +2,7 @@
  * 매물 요청에 관한 옵션을 지정
  */
 
-import { CommonSearchRequest, SearchRequest } from '../type/land';
+import { CommonSearchRequest, SearchArticleRequest, SearchRequest } from '../type/land';
 
 const commonFilter: CommonSearchRequest = {
     realEstateType: 'OPST',
@@ -72,4 +72,30 @@ export const requestParamForVilla: SearchRequest = {
     topLat: '37.360585799999996',
     tradeType: 'B1',
     zoom: '15',
+};
+
+export const requestParamForOneTwoRoom: SearchArticleRequest = {
+    cortarNo: '4113510300',
+    order: 'rank',
+    realEstateType: 'APT:OPST:ABYG:OBYG:GM:OR:VL:DDDGG:JWJT:SGJT:HOJT',
+    tradeType: 'B1',
+    tag: ':::::::SMALLSPCRENT:',
+    rentPriceMin: '0',
+    rentPriceMax: '900000000',
+    priceMin: '10000',
+    priceMax: '20000',
+    areaMin: '0',
+    areaMax: '900000000',
+    oldBuildYears: '',
+    recentlyBuildYears: '',
+    minHouseHoldCount: '',
+    maxHouseHoldCount: '',
+    showArticle: 'false',
+    sameAddressGroup: 'false',
+    minMaintenanceCost: '5',
+    maxMaintenanceCost: '10',
+    priceType: 'RETAIL',
+    directions: '',
+    page: '1',
+    articleState: '',
 };
