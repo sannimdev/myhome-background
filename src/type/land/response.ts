@@ -48,62 +48,64 @@ export interface Room {
 
 // 원룸, 투룸 응답
 export interface ArticleResponse {
-    isMoreData: boolean;
-    articleList: ArticleList[];
-    mapExposedCount: number;
-    nonMapExposedIncluded: boolean;
+    code: string;
+    more: boolean;
+    TIME: boolean;
+    z: number;
+    page: number;
+    body: Body[];
 }
 
-export interface ArticleList {
-    articleNo: string;
-    articleName: string;
-    articleStatus: string;
-    realEstateTypeCode: string;
-    realEstateTypeName: string;
-    articleRealEstateTypeCode: string;
-    articleRealEstateTypeName: string;
-    tradeTypeCode: string;
-    tradeTypeName: string;
-    verificationTypeCode: string;
-    floorInfo: string;
-    priceChangeState: string;
-    isPriceModification: boolean;
-    dealOrWarrantPrc: string;
-    area1: number;
-    area2: number;
+export interface Body {
+    atclNo: string;
+    cortarNo: string;
+    atclNm: string;
+    atclStatCd: string;
+    rletTpCd: string;
+    uprRletTpCd: string;
+    rletTpNm: string;
+    tradTpCd: string;
+    tradTpNm: string;
+    vrfcTpCd: string;
+    flrInfo: string;
+    prc: number;
+    rentPrc: number;
+    hanPrc: string;
+    spc1: number;
+    spc2: number;
     direction: string;
-    articleConfirmYmd: string;
-    siteImageCount: number;
-    articleFeatureDesc: string;
+    atclCfmYmd: string;
+    lat: number;
+    lng: number;
+    atclFetrDesc: string;
     tagList: string[];
-    buildingName: string;
+    bildNm: string;
+    minute: number;
     sameAddrCnt: number;
     sameAddrDirectCnt: number;
-    sameAddrMaxPrc: string;
-    sameAddrMinPrc: string;
     cpid: string;
-    cpName: string;
-    cpPcArticleUrl: string;
-    cpPcArticleBridgeUrl: string;
-    cpPcArticleLinkUseAtArticleTitleYn: boolean;
-    cpPcArticleLinkUseAtCpNameYn: boolean;
-    cpMobileArticleUrl: string;
-    cpMobileArticleLinkUseAtArticleTitleYn: boolean;
-    cpMobileArticleLinkUseAtCpNameYn: boolean;
-    latitude: string;
-    longitude: string;
-    isLocationShow: boolean;
-    realtorName: string;
-    realtorId: string;
+    cpNm: string;
+    cpCnt: number;
+    rltrNm: string;
+    directTradYn: string;
+    minMviFee: number;
+    maxMviFee: number;
+    etRoomCnt: number;
+    tradePriceHan: string;
+    tradeRentPrice: number;
     tradeCheckedByOwner: boolean;
-    isDirectTrade: boolean;
-    isInterest: boolean;
-    isComplex: boolean;
-    detailAddress: string;
-    detailAddressYn: string;
-    areaName?: string;
+    cpLinkVO: CpLinkVO;
+    dtlAddrYn: string;
+    dtlAddr: string;
 }
 
-export interface ArticleList {
-    createdAt?: Date;
+export interface CpLinkVO {
+    cpId: string;
+    mobileArticleUrl?: string;
+    mobileArticleLinkTypeCode: string;
+    mobileBmsInspectPassYn: string;
+    pcArticleLinkUseAtArticleTitle: boolean;
+    pcArticleLinkUseAtCpName: boolean;
+    mobileArticleLinkUseAtArticleTitle: boolean;
+    mobileArticleLinkUseAtCpName: boolean;
 }

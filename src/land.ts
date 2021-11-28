@@ -1,4 +1,4 @@
-import axios, { AxiosResponse } from 'axios';
+import axios, { Axios, AxiosInstance, AxiosResponse } from 'axios';
 import {
     requestParamForComplex,
     requestParamForOneTwoRoom,
@@ -9,7 +9,6 @@ import {
     COMPLEX_BASE_URL,
     VILLA_BASE_URL,
     USER_AGENT_CHROME,
-    NAVER_LAND_URL,
     ONE_TWO_ROOM_BASE_URL,
 } from './util/config';
 
@@ -23,33 +22,29 @@ export async function getLand(url: string, params: SearchRequest) {
     }
 }
 
-export async function getArticle(url: string, params: SearchArticleRequest, token: string) {
+export async function getArticle(url: string, params: SearchArticleRequest) {
     try {
-        const reqHeaders = { ...headers, authorization: `Bearer ${token}` };
-        const response: AxiosResponse<ArticleResponse> = await axios.get(url, {
-            params,
-            headers: reqHeaders,
-        });
-        const articleList = response.data.articleList || [];
-        return articleList.map((article) => ({ ...article, createdAt: new Date() }));
+        const response: AxiosResponse<ArticleResponse> = await axios.get(url, { params, headers });
+        console.log(response.data);
+        return response.data;
     } catch (e) {
         throw e;
     }
 }
 
-export async function getNaverLandToken(): Promise<string> {
-    try {
-        const response = await axios.get(NAVER_LAND_URL);
-        const html = String(response.data).replace(/ /gi, '');
-        const token = `"token":{"token":"`;
-        const tokenStart = html.search(new RegExp(token)) + token.length;
-        const tokenEnd = tokenStart + html.substring(tokenStart).indexOf(`"`);
-        return html.substring(tokenStart, tokenEnd);
-    } catch (e) {
-        console.error('getNaverLandToken', e);
-        throw new Error('Token Eror');
-    }
-}
+// export async function getNaverLandToken(instance: AxiosInstance): Promise<string> {
+//     try {
+//         const response = await instance.get(NAVER_LAND_URL);
+//         const html = String(response.data).replace(/ /gi, '');
+//         const token = `"token":{"token":"`;
+//         const tokenStart = html.search(new RegExp(token)) + token.length;
+//         const tokenEnd = tokenStart + html.substring(tokenStart).indexOf(`"`);
+//         return html.substring(tokenStart, tokenEnd);
+//     } catch (e) {
+//         console.error('getNaverLandToken', e);
+//         throw new Error('Token Eror');
+//     }
+// }
 
 export async function testComplex() {
     try {
@@ -67,13 +62,9 @@ export async function testVilla() {
     }
 }
 
-export async function testOneTwoRoom(token: string) {
+export async function testOneTwoRoom() {
     try {
-        if (!token)
-            throw new Error(
-                'Please input your token from your function to testOneTwoRoom function'
-            );
-        return getArticle(ONE_TWO_ROOM_BASE_URL, requestParamForOneTwoRoom, token);
+        return getArticle(ONE_TWO_ROOM_BASE_URL, requestParamForOneTwoRoom);
     } catch (e) {
         console.error('testOneTwoRoom', e);
     }

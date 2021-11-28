@@ -36,29 +36,25 @@ export interface SearchRequest extends CommonSearchRequest {
 
 //원룸, 투룸
 export interface SearchArticleRequest {
+    itemId: string;
+    mapKey: string;
+    lgeo: string;
+    rletTpCd: string;
+    tradTpCd: string;
+    z: string;
+    lat: string;
+    lon: string;
+    btm: string;
+    lft: string;
+    top: string;
+    rgt: string;
     cortarNo: string;
-    order: SearchOrder;
-    realEstateType: string;
-    tradeType: string;
+    showR0: string;
+    wprcMin: string;
+    wprcMax: string;
+    spcMin: string;
+    spcMax: string;
     tag: string;
-    rentPriceMin: string;
-    rentPriceMax: string;
-    priceMin: string;
-    priceMax: string;
-    areaMin: string;
-    areaMax: string;
-    oldBuildYears: string;
-    recentlyBuildYears: string;
-    minHouseHoldCount: string;
-    maxHouseHoldCount: string;
-    showArticle: string;
-    sameAddressGroup: string;
-    minMaintenanceCost: string;
-    maxMaintenanceCost: string;
-    priceType: string;
-    directions: string;
-    page: string | number;
-    articleState: string;
 }
 
 export type SearchOrder =
