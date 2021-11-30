@@ -7,7 +7,7 @@ export const OVERVIEW_IMAGE_URL = 'https://landthumb-phinf.pstatic.net/';
 
 // 상세 매물번호가 들어간 페이지
 export const getArticleDetailUrl = (articleNo: number | string) =>
-    `https://m.land.naver.com/article/info/${articleNo}`;
+    `https://m.land.naver.com/article/info/${articleNo}?newMobile`;
 
 // 테스트 요청 페이지
 export const SAMPLE_OVERVIEW_IMAGE_URL =
