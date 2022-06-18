@@ -1,3 +1,4 @@
+import { parse } from 'node-html-parser';
 import { IS_LOCAL_MACHINE } from './lib/environment';
 import { saveFile } from './lib/file';
 import { getArticleDetail, getArticleDetailImages, getArticles } from './lib/land';
@@ -8,10 +9,7 @@ async function sleep(ms: number = 0) {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-export async function getArticleList(
-    requestParam: SearchArticleRequest,
-    maxPage = Number.MAX_SAFE_INTEGER
-) {
+export async function getArticleList(requestParam: SearchArticleRequest, maxPage = Number.MAX_SAFE_INTEGER) {
     try {
         const rooms: Room[] = [];
         let page = 1;
@@ -20,11 +18,7 @@ export async function getArticleList(
             Object.assign(rooms, [...rooms, ...room]);
             page += 1;
             if (room.length === 20) {
-                console.log(
-                    `🚚 매물 목록 중 ${
-                        page - 1
-                    }페이지 수집을 종료하고 다음 ${page}페이지 정보를 수집합니다`
-                );
+                console.log(`🚚 매물 목록 중 ${page - 1}페이지 수집을 종료하고 다음 ${page}페이지 정보를 수집합니다`);
                 await sleep(1000);
             } else {
                 console.log('🚧 매물 목록 수집을 종료합니다...');
@@ -55,10 +49,15 @@ export async function getDetail(articleNo: number | string) {
 
 export async function getDetailImages(articleNo: number | string) {
     try {
-        return await getArticleDetailImages(articleNo);
+        const response = await getArticleDetailImages(articleNo);
+        const dom = parse(response);
+        const nodes = dom.querySelectorAll('li.photo_list_item > div > a');
+        const styles = nodes.map((node) => node.getAttribute('style'));
+        const images = styles.map((style) => style?.substring(style.search(/https\:\/\//), style.search(/\)$/)));
+        return images;
     } catch (e) {
         console.error('getDetailImages', e);
-        return e + '';
+        return [];
     }
 }
 

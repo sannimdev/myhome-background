@@ -47,6 +47,25 @@ export const requestParamSample2: SearchArticleRequest = {
     tag: 'SMALLSPCRENT',
 };
 
+export const requestParamSample3: SearchArticleRequest = {
+    view: 'atcl',
+    rletTpCd: 'OPST',
+    tradTpCd: 'B1',
+    z: '17',
+    lat: '37.3788752',
+    lon: '127.1154778',
+    btm: '37.3759893',
+    lft: '127.1091746',
+    top: '37.3817611',
+    rgt: '127.121781',
+    spcMin: '33',
+    spcMax: '99',
+    pCortarNo: '17_4113510200',
+    addon: 'COMPLEX',
+    bAddon: 'COMPLEX',
+    isOnlyIsale: 'false',
+};
+
 // 해당 클러스터의 lgeo를 이용하여 매물의 개수를 구해야 한다.
 export const requestClusterList: SearchClusterList = {
     view: 'atcl',

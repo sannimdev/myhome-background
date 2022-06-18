@@ -1,12 +1,7 @@
 import axios, { AxiosResponse } from 'axios';
-import * as cheerio from 'cheerio';
+// import * as cheerio from 'cheerio';
 import { ArticleResponse, Room, SearchArticleRequest, SearchClusterList } from '../type/land';
-import {
-    getArticleDetailUrl,
-    NAVER_ARTICLE_LIST_URL,
-    NAVER_CLUSTER_LIST_URL,
-    USER_AGENT_CHROME,
-} from '../util/config';
+import { getArticleDetailUrl, NAVER_ARTICLE_LIST_URL, NAVER_CLUSTER_LIST_URL, USER_AGENT_CHROME } from '../util/config';
 
 const headers = { 'User-Agent': USER_AGENT_CHROME };
 
@@ -38,8 +33,7 @@ export async function getArticleDetail(articleNo: number | string) {
                 'Sec-Fetch-Mode': 'navigate',
                 'Sec-Fetch-Dest': 'iframe',
                 'Accept-Encoding': 'gzip, deflate, br',
-                'Accept-Language':
-                    'ko,en-US;q=0.9,en;q=0.8,ru;q=0.7,ja;q=0.6,zh-CN;q=0.5,zh;q=0.4,zh-TW;q=0.3',
+                'Accept-Language': 'ko,en-US;q=0.9,en;q=0.8,ru;q=0.7,ja;q=0.6,zh-CN;q=0.5,zh;q=0.4,zh-TW;q=0.3',
                 dnt: '1',
                 'sec-gpc': '1',
             },
