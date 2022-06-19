@@ -1,7 +1,8 @@
 export interface SearchArticleRequest {
+    view?: string;
     itemId?: string;
-    mapKey: string;
-    lgeo: string;
+    mapKey?: string;
+    lgeo?: string;
     rletTpCd: string;
     tradTpCd: string;
     z: string;
@@ -11,16 +12,20 @@ export interface SearchArticleRequest {
     lft: string;
     top: string;
     rgt: string;
-    cortarNo: string;
-    showR0: string;
-    wprcMin: string;
-    wprcMax: string;
+    cortarNo?: string;
+    pCortarNo?: string;
+    showR0?: string;
+    wprcMin?: string;
+    wprcMax?: string;
     spcMin: string;
     spcMax: string;
-    tag: string;
+    tag?: string;
     page?: string | number;
     sort?: SearchOrder;
     totCnt?: number;
+    addon?: string;
+    bAddon?: string;
+    isOnlyIsale?: string;
 }
 
 export type SearchOrder =
