@@ -3,7 +3,6 @@ export type RoomDetail = {
         [key: string]: string;
     };
     facility: {
-        room: string[];
-        security: string[];
+        [key: string]: Object;
     };
 };

@@ -6,6 +6,7 @@ import {
     writeDocumentsForRooms,
 } from './article';
 import { requestParamSample3 } from './data/request';
+import { client } from './lib/mongo';
 import { Room } from './type/land';
 
 async function run() {
@@ -38,6 +39,7 @@ async function run() {
         console.error('run()', e);
     } finally {
         //////////////////////////////// 프로세스 종료 명시적으로 해야 종료됨.
+        client.close();
         process.exit();
     }
 }

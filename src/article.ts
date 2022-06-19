@@ -65,34 +65,44 @@ export async function getDetailImages(articleNo: number | string): Promise<strin
 
 export async function writeDocumentsForRoomDetail(articleNo: number | string, content: string): Promise<boolean> {
     try {
+        const result: RoomDetail = {
+            property: {},
+            facility: {},
+        };
         const dom = parse(content);
         // 1. 매물 정보
         const details = dom.querySelectorAll('.detail_row_cell');
         const property: { [key: string]: string } = {};
+        console.log(`🧱 ${details.length}개 매물 속성 파싱하기`);
         for (const node of details) {
             const key = node.querySelector('.detail_cell_title')?.innerText || '';
             const value = node.querySelector('.detail_cell_data')?.innerText || '';
             if (key) property[key] = value;
         }
+        result.property = property;
         // 2. 방 내부 시설
-        const getInnerText = (nodes: HTMLElement[]) => nodes.map((node) => node.innerText || '').filter((s) => !!s);
-        const facilitiesNodes = dom.querySelectorAll('.detail_facilities_list');
-        const roomFacilities = facilitiesNodes[0].querySelectorAll('.detail_info_title');
-        const room = getInnerText(roomFacilities);
-        // 3. 보안/생활시설
-        const securityFacilities = facilitiesNodes[1].querySelectorAll('.detail_info_title');
-        const security = getInnerText(securityFacilities);
+        const getInnerText = (nodes: HTMLElement[]): string[] =>
+            nodes.map((node) => node.innerText || '').filter((s) => !!s);
+        const facilitiesNodes = dom.querySelectorAll('.detail_facilities');
 
-        const result = {
-            property,
-            facility: {
-                room,
-                security,
-            },
-        };
+        if (facilitiesNodes.length) {
+            const facilities: { [key: string]: string } = {
+                '방 내부시설': 'room',
+                '보안/생활시설': 'security',
+                '주변 편의시설/1km 이내': 'neighborhood',
+            };
+            facilitiesNodes.forEach((facility) => {
+                const title = facility.querySelector('.detail_head_title')?.innerText;
+                if (title) {
+                    const key = facilities[title] || title;
+                    result.facility[key] = getInnerText(facility.querySelectorAll('.detail_info_title'));
+                    console.log(result.facility);
+                }
+            });
+        }
 
-        console.log('🔍 매물 상세 정보 파싱');
-        console.log(result);
+        console.log(`🔍 ${articleNo}번 매물 상세 정보를 파싱합니다`);
+        // console.log(result);
 
         IS_LOCAL_MACHINE
             ? await saveFile(`article-detail-${articleNo}-${Date.now()}.json`, JSON.stringify(result, null, 3))
