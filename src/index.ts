@@ -18,19 +18,17 @@ async function run() {
         await writeDocumentsForRooms(rooms);
 
         // // 매물 상세 파싱하기
-        const dummyRooms = [rooms[0], rooms[1]];
         const details = await Promise.allSettled(
-            dummyRooms.map(async (room) => {
+            rooms.map(async (room) => {
                 const articles = await getDetail(room.atclNo);
                 await writeDocumentsForRoomDetail(room.atclNo, articles);
 
-                const images = await getDetailImages(room.atclNo);
-                console.log(images);
+                // const images = await getDetailImages(room.atclNo); 매물 이미지 정보 파싱
             })
         );
         console.log(details.filter(({ status }) => status === 'fulfilled'));
 
-        /*🚨 쾌속 루틴 */
+        /*🚨 쾌속 테스트 */
         // const no = 2219494127;
         // const response = await getDetail(no);
         // const images = await getDetailImages(no);

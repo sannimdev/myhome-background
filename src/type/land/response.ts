@@ -1,3 +1,5 @@
+import { RoomDetail } from './custom';
+
 // 파싱한 시각 기록하기 (nullable)
 export interface Room {
     createdAt?: Date;
@@ -54,6 +56,8 @@ export interface Room {
     cpLinkVO?: CpLinkVO;
     dtlAddrYn?: string;
     dtlAddr?: string;
+    // with custom
+    myhomeRoomDetail?: RoomDetail;
 }
 export interface CpLinkVO {
     cpId: string;
@@ -66,15 +70,7 @@ export interface CpLinkVO {
     mobileArticleLinkUseAtCpName: boolean;
 }
 
-export const getArticleTypes = () => [
-    '빌라',
-    '일반원룸',
-    '래미안블레스티지',
-    '다가구',
-    '단독',
-    '기타',
-    '상가주택',
-];
+export const getArticleTypes = () => ['빌라', '일반원룸', '래미안블레스티지', '다가구', '단독', '기타', '상가주택'];
 export const getRletTypes = () => ['빌라', '원룸', '아파트', '단독/다가구', '상가주택'];
 export const getTradeTypes = () => ['전세', '월세'];
 export type ArticleTypes = ReturnType<typeof getArticleTypes>;
