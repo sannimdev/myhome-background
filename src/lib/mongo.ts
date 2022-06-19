@@ -1,5 +1,5 @@
 import { parse } from 'path';
-import { MongoClient } from 'mongodb';
+import { MongoClient, ObjectId } from 'mongodb';
 import dotenv from 'dotenv';
 import { Room, RoomDetail } from '../type/land';
 
@@ -12,7 +12,7 @@ const dbName = env ? env.MONGODB_NAME : process.env.MONGODB_NAME;
 console.log(`id ${!!id}, pw ${!!pw}, dbName ${!!dbName}`);
 
 const url = `mongodb+srv://${id}:${pw}@cluster0.scwj7.mongodb.net/?retryWrites=true&w=majority`;
-const client = new MongoClient(url);
+export const client = new MongoClient(url);
 
 export async function addDocument(collectionName: string, elements: any[]) {
     try {
@@ -33,13 +33,11 @@ export async function getRoom(articleNo: number | string) {
         await client.connect();
         const db = client.db(dbName);
         const collection = db.collection('room');
-        const result = await collection.find({ id: articleNo }).toArray();
+        const result = await collection.find({ atclNo: articleNo }).toArray();
         return result;
     } catch (e) {
         console.error('getRoom', e);
         return e;
-    } finally {
-        client.close();
     }
 }
 
@@ -50,13 +48,14 @@ export async function overwriteRooms(rooms: Room[]) {
         const db = client.db(dbName);
         const collection = db.collection('room');
         for (const room of rooms) {
-            await collection.findOneAndReplace({ id: room.atclNo }, room);
+            const mongoRoom = await collection.findOne({ atclNo: room.atclNo + '' });
+            if (!!mongoRoom)
+                await collection.updateOne({ atclNo: room.atclNo + '' }, { $set: { ...room, _id: mongoRoom._id } });
+            else await collection.insertOne(room);
         }
     } catch (e) {
         console.error('overwriteRoom', e);
         return e;
-    } finally {
-        client.close();
     }
 }
 
@@ -66,14 +65,17 @@ export async function overwriteRoom(articleNo: number | string, myhomeRoomDetail
         await client.connect();
         const db = client.db(dbName);
         const collection = db.collection('room');
-        const room = await collection.findOne({ id: articleNo });
+        const room = await collection.findOne({ atclNo: articleNo });
         if (room) {
-            await collection.findOneAndReplace({ id: articleNo }, { ...room, myhomeRoomDetail } as Room);
+            await collection.updateOne(
+                { atclNo: articleNo + '' },
+                {
+                    $set: { ...room, myhomeRoomDetail, _id: room._id },
+                }
+            );
         }
     } catch (e) {
         console.error('overwriteRoom', e);
         return e;
-    } finally {
-        client.close();
     }
 }
