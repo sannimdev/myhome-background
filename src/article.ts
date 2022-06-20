@@ -59,7 +59,7 @@ export async function getDetailImages(articleNo: number | string): Promise<strin
         return styles.map((style) => style?.substring(style.search(/https\:\/\//), style.search(/\)$/)) || '');
     } catch (e) {
         console.error('getDetailImages', e);
-        return [];
+        throw e;
     }
 }
 
