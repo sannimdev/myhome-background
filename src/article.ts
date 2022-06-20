@@ -35,10 +35,10 @@ export async function getArticleList(requestParam: SearchArticleRequest, maxPage
 export async function writeDocumentsForRooms(rooms: Room[]) {
     if (IS_LOCAL_MACHINE) {
         await saveFile(`article-list-${Date.now()}.json`, JSON.stringify(rooms, null, 4));
-        return;
+    } else {
+        await addDocument('daily', rooms);
+        await overwriteRooms(rooms);
     }
-    await addDocument('daily', rooms);
-    await overwriteRooms(rooms);
 }
 
 export async function getDetail(articleNo: number | string) {
@@ -103,7 +103,6 @@ export async function writeDocumentsForRoomDetail(articleNo: number | string, co
 
         console.log(`🔍 ${articleNo}번 매물 상세 정보를 파싱합니다`);
         // console.log(result);
-
         IS_LOCAL_MACHINE
             ? await saveFile(`article-detail-${articleNo}-${Date.now()}.json`, JSON.stringify(result, null, 3))
             : await overwriteRoom(articleNo, result);
