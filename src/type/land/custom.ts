@@ -5,4 +5,5 @@ export type RoomDetail = {
     facility: {
         [key: string]: Object;
     };
+    images: string[];
 };
