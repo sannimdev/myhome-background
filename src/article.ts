@@ -35,10 +35,10 @@ export async function getArticleList(requestParam: SearchArticleRequest, maxPage
 export async function writeDocumentsForRooms(rooms: Room[]) {
     if (IS_LOCAL_MACHINE) {
         await saveFile(`article-list-${Date.now()}.json`, JSON.stringify(rooms, null, 4));
-        return;
+    } else {
+        await addDocument('daily', rooms);
+        await overwriteRooms(rooms);
     }
-    await addDocument('daily', rooms);
-    await overwriteRooms(rooms);
 }
 
 export async function getDetail(articleNo: number | string) {
@@ -65,11 +65,14 @@ export async function getDetailImages(articleNo: number | string): Promise<strin
 
 export async function writeDocumentsForRoomDetail(articleNo: number | string, content: string): Promise<boolean> {
     try {
+        console.log(`🔍 ${articleNo}번 매물 상세 정보를 파싱합니다`);
         const result: RoomDetail = {
             property: {},
             facility: {},
+            images: [],
         };
         const dom = parse(content);
+
         // 1. 매물 정보
         const details = dom.querySelectorAll('.detail_row_cell');
         const property: { [key: string]: string } = {};
@@ -80,6 +83,7 @@ export async function writeDocumentsForRoomDetail(articleNo: number | string, co
             if (key) property[key] = value;
         }
         result.property = property;
+
         // 2. 방 내부 시설
         const getInnerText = (nodes: HTMLElement[]): string[] =>
             nodes.map((node) => node.innerText || '').filter((s) => !!s);
@@ -96,14 +100,16 @@ export async function writeDocumentsForRoomDetail(articleNo: number | string, co
                 if (title) {
                     const key = facilities[title] || title;
                     result.facility[key] = getInnerText(facility.querySelectorAll('.detail_info_title'));
-                    console.log(result.facility);
+                    !IS_LOCAL_MACHINE && console.log(result.facility);
                 }
             });
         }
 
-        console.log(`🔍 ${articleNo}번 매물 상세 정보를 파싱합니다`);
-        // console.log(result);
+        // 3. 이미지 파싱
+        result.images = await getDetailImages(articleNo);
+        console.log(result.images);
 
+        // console.log(result);
         IS_LOCAL_MACHINE
             ? await saveFile(`article-detail-${articleNo}-${Date.now()}.json`, JSON.stringify(result, null, 3))
             : await overwriteRoom(articleNo, result);
