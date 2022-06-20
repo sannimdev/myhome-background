@@ -45,7 +45,6 @@ async function runOnProduction() {
         rooms.map(async (room) => {
             const articles = await getDetail(room.atclNo);
             await writeDocumentsForRoomDetail(room.atclNo, articles);
-            // const images = await getDetailImages(room.atclNo); 매물 이미지 정보 파싱
         })
     );
     console.log(details.filter(({ status }) => status === 'fulfilled'));
