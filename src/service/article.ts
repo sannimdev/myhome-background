@@ -107,7 +107,7 @@ export async function writeDocumentsForRoomDetail(articleNo: number | string, co
 
         // 3. 이미지 파싱
         result.images = await getDetailImages(articleNo);
-        // console.log(result.images);
+        console.log(result.images);
 
         IS_LOCAL_MACHINE
             ? await saveFile(`article-detail-${articleNo}-${Date.now()}.json`, JSON.stringify(result, null, 3))
