@@ -1,9 +1,9 @@
 import { parse, HTMLElement } from 'node-html-parser';
-import { IS_LOCAL_MACHINE } from './lib/environment';
-import { saveFile } from './lib/file';
-import { getArticleDetail, getArticleDetailImages, getArticles } from './lib/land';
-import { addDocument, overwriteRoom, overwriteRooms } from './lib/mongo';
-import { Room, RoomDetail, SearchArticleRequest } from './type/land';
+import { IS_LOCAL_MACHINE } from '../lib/environment';
+import { saveFile } from '../lib/file';
+import { getArticleDetail, getArticleDetailImages, getArticles } from '../lib/land';
+import { addDocument, overwriteRoom, overwriteRooms } from '../lib/mongo';
+import { Room, RoomDetail, SearchArticleRequest } from '../type/land';
 
 async function sleep(ms: number = 0) {
     return new Promise((resolve) => setTimeout(resolve, ms));
@@ -28,7 +28,7 @@ export async function getArticleList(requestParam: SearchArticleRequest, maxPage
         return rooms;
     } catch (e) {
         console.error('getArticleList', e);
-        return [];
+        throw e;
     }
 }
 
@@ -46,7 +46,7 @@ export async function getDetail(articleNo: number | string) {
         return await getArticleDetail(articleNo);
     } catch (e) {
         console.error('getDetail', e);
-        return e + '';
+        throw e;
     }
 }
 
@@ -109,7 +109,6 @@ export async function writeDocumentsForRoomDetail(articleNo: number | string, co
         result.images = await getDetailImages(articleNo);
         console.log(result.images);
 
-        // console.log(result);
         IS_LOCAL_MACHINE
             ? await saveFile(`article-detail-${articleNo}-${Date.now()}.json`, JSON.stringify(result, null, 3))
             : await overwriteRoom(articleNo, result);
