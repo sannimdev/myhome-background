@@ -1,9 +1,9 @@
 import { parse, HTMLElement } from 'node-html-parser';
-import { IS_LOCAL_MACHINE } from './lib/environment';
-import { saveFile } from './lib/file';
-import { getArticleDetail, getArticleDetailImages, getArticles } from './lib/land';
-import { addDocument, overwriteRoom, overwriteRooms } from './lib/mongo';
-import { Room, RoomDetail, SearchArticleRequest } from './type/land';
+import { IS_LOCAL_MACHINE } from '../lib/environment';
+import { saveFile } from '../lib/file';
+import { getArticleDetail, getArticleDetailImages, getArticles } from '../lib/land';
+import { addDocument, overwriteRoom, overwriteRooms } from '../lib/mongo';
+import { Room, RoomDetail, SearchArticleRequest } from '../type/land';
 
 async function sleep(ms: number = 0) {
     return new Promise((resolve) => setTimeout(resolve, ms));
@@ -59,7 +59,7 @@ export async function getDetailImages(articleNo: number | string): Promise<strin
         return styles.map((style) => style?.substring(style.search(/https\:\/\//), style.search(/\)$/)) || '');
     } catch (e) {
         console.error('getDetailImages', e);
-        return [];
+        throw e;
     }
 }
 
@@ -107,9 +107,8 @@ export async function writeDocumentsForRoomDetail(articleNo: number | string, co
 
         // 3. 이미지 파싱
         result.images = await getDetailImages(articleNo);
-        console.log(result.images);
+        // console.log(result.images);
 
-        // console.log(result);
         IS_LOCAL_MACHINE
             ? await saveFile(`article-detail-${articleNo}-${Date.now()}.json`, JSON.stringify(result, null, 3))
             : await overwriteRoom(articleNo, result);

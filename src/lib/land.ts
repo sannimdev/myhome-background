@@ -1,5 +1,4 @@
 import axios, { AxiosResponse } from 'axios';
-// import * as cheerio from 'cheerio';
 import { ArticleResponse, Room, SearchArticleRequest, SearchClusterList } from '../type/land';
 import { getArticleDetailUrl, NAVER_ARTICLE_LIST_URL, NAVER_CLUSTER_LIST_URL, USER_AGENT_CHROME } from '../util/config';
 
@@ -38,11 +37,6 @@ export async function getArticleDetail(articleNo: number | string) {
                 'sec-gpc': '1',
             },
         });
-        // const $ = cheerio.load(response.data);
-        // const target = ['detail_cell_title', 'detail_description_text'];
-        // return target.map((className) => $(`.detail_row_cell`).html());
-        // const result: string[] = [];
-        // console.log($('#content.content.content_detail'));
         return response.data;
     } catch (e) {
         throw e;
