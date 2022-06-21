@@ -2,7 +2,11 @@ import { RoomDetail } from './custom';
 
 // 파싱한 시각 기록하기 (nullable)
 export interface Room {
+    // 커스터마이징 속성
     createdAt?: Date;
+    updatedAt?: Date;
+    myhomeRoomDetail?: RoomDetail;
+    myhomeNotValid?: boolean;
 }
 
 // 매물 목록 응답
@@ -15,6 +19,7 @@ export interface ArticleResponse {
     body: Room[];
 }
 
+// 네이버 파싱 기준 룸 유형
 export interface Room {
     atclNo: string; // 매물 번호
     cortarNo: string; // 권역 번호
@@ -56,8 +61,6 @@ export interface Room {
     cpLinkVO?: CpLinkVO;
     dtlAddrYn?: string;
     dtlAddr?: string;
-    // with custom
-    myhomeRoomDetail?: RoomDetail;
 }
 export interface CpLinkVO {
     cpId: string;
