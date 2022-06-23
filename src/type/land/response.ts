@@ -5,8 +5,8 @@ export interface Room {
     // 커스터마이징 속성
     createdAt?: Date;
     updatedAt?: Date;
+    deletedAt?: Date;
     myhomeRoomDetail?: RoomDetail;
-    myhomeNotValid?: boolean;
 }
 
 // 매물 목록 응답
@@ -79,3 +79,19 @@ export const getTradeTypes = () => ['전세', '월세'];
 export type ArticleTypes = ReturnType<typeof getArticleTypes>;
 export type RletTypes = ReturnType<typeof getRletTypes>;
 export type TradeTypes = ReturnType<typeof getTradeTypes>;
+
+export interface ArticleInClusterList {
+    lgeo: string;
+    count: number;
+    z: number;
+    lat: number;
+    lon: number;
+    itemId?: string;
+    tradTpCd?: string;
+    rletNm?: string;
+    tradNm?: string;
+    priceTtl?: string;
+    psr: number;
+    minMviFee?: number;
+    maxMviFee?: number;
+}

@@ -1,18 +1,18 @@
-import { requestParamSample3 } from './data/request';
+import { requestClusterList } from './data/request';
 import { IS_LOCAL_MACHINE } from './lib/environment';
-import { openMongo, closeMongo, getRooms } from './lib/mongo';
-import { cleanUpInvalidArticles, requestArticles } from './routine/article';
+import { getClusters } from './lib/land';
+import { openMongo, closeMongo } from './lib/mongo';
+import { cleanUpInvalidArticles, requestArticles, requestClusters } from './routine/article';
+import { SearchArticleRequest } from './type/land';
 
 run();
 
 async function run() {
     try {
         await openMongo();
-        if (false && IS_LOCAL_MACHINE) {
-            await runOnLocalMachine();
-        } else {
-            await runOnProduction();
-        }
+
+        // await runOnLocalMachine();
+        await runOnProduction();
     } catch (e) {
         console.error('run()', e);
     } finally {
@@ -28,10 +28,7 @@ async function runOnProduction() {
     await cleanUpInvalidArticles();
 
     // 2. 매물 목록 파싱하여 등록하기
-    const params = [requestParamSample3];
-    for (const param of params) {
-        await requestArticles(param);
-    }
+    await requestClusters(requestClusterList);
 }
 
 async function runOnLocalMachine() {
@@ -42,4 +39,15 @@ async function runOnLocalMachine() {
     // console.log('🚚', images);
     // const rooms = (await getRooms()) as Room[];
     // console.log(response);
+    // 매물 정보 파싱
+    // for (const cluster of requestClusterList) {
+    //     const articles = await getClusters(cluster);
+    //     for (const article of articles) {
+    //         const searchArticleRequest: SearchArticleRequest = {
+    //             ...article,
+    //             ...cluster,
+    //         };
+    //         await requestArticles(searchArticleRequest);
+    //     }
+    // }
 }

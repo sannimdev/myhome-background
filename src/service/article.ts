@@ -18,10 +18,12 @@ export async function getArticleList(requestParam: SearchArticleRequest, maxPage
             Object.assign(rooms, [...rooms, ...room]);
             page += 1;
             if (room.length === 20) {
-                console.log(`🚚 매물 목록 중 ${page - 1}페이지 수집을 종료하고 다음 ${page}페이지 정보를 수집합니다`);
+                console.log(
+                    `    🚚 매물 목록 중 ${page - 1}페이지 수집을 종료하고 다음 ${page}페이지 정보를 수집합니다`
+                );
                 await sleep(1000);
             } else {
-                console.log('🚧 매물 목록 수집을 종료합니다...');
+                console.log('    🚧 매물 목록 수집을 종료합니다...');
                 break;
             }
         }
@@ -65,7 +67,7 @@ export async function getDetailImages(articleNo: number | string): Promise<strin
 
 export async function writeDocumentsForRoomDetail(articleNo: number | string, content: string): Promise<boolean> {
     try {
-        console.log(`🔍 ${articleNo}번 매물 상세 정보를 파싱합니다`);
+        console.log(`        🔍 ${articleNo}번 매물 상세 정보를 파싱합니다`);
         const result: RoomDetail = {
             property: {},
             facility: {},
@@ -76,7 +78,7 @@ export async function writeDocumentsForRoomDetail(articleNo: number | string, co
         // 1. 매물 정보
         const details = dom.querySelectorAll('.detail_row_cell');
         const property: { [key: string]: string } = {};
-        console.log(`🧱 ${details.length}개 매물 속성 파싱하기`);
+        console.log(`        🧱 ${details.length}개 매물 속성 파싱하기`);
         for (const node of details) {
             const key = node.querySelector('.detail_cell_title')?.innerText || '';
             const value = node.querySelector('.detail_cell_data')?.innerText || '';
@@ -107,7 +109,7 @@ export async function writeDocumentsForRoomDetail(articleNo: number | string, co
 
         // 3. 이미지 파싱
         result.images = await getDetailImages(articleNo);
-        console.log(result.images);
+        console.log('    ', JSON.stringify(result.images, null, 3));
 
         IS_LOCAL_MACHINE
             ? await saveFile(`article-detail-${articleNo}-${Date.now()}.json`, JSON.stringify(result, null, 3))
