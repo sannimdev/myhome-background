@@ -1,13 +1,13 @@
-import { Room, SearchArticleRequest } from '../type/land';
+import { Room, SearchArticleRequest, SearchClusterList } from '../type/land';
 import { getRooms, overwriteRooms } from '../lib/mongo';
-import { getArticleDetail } from '../lib/land';
+import { getArticleDetail, getClusters } from '../lib/land';
 import { getDetail } from '../service/article';
 import { writeDocumentsForRoomDetail } from '../service/article';
 import { writeDocumentsForRooms } from '../service/article';
 import { getArticleList } from '../service/article';
 
 export async function cleanUpInvalidArticles(): Promise<void> {
-    const rooms = ((await getRooms()) as Room[]).filter((room) => !room?.myhomeNotValid);
+    const rooms = ((await getRooms()) as Room[]).filter((room) => !room?.deletedAt);
     console.log(
         rooms.length,
         rooms.map((room) => room.atclNo)
@@ -19,8 +19,20 @@ export async function cleanUpInvalidArticles(): Promise<void> {
             invalidRooms.push(room);
         }
     }
-    await overwriteRooms(invalidRooms.map((room) => ({ ...room, myHomeNotValid: true })) as Room[]);
+    await overwriteRooms(invalidRooms.map((room) => ({ ...room, deletedAt: new Date() })) as Room[]);
     console.log('✂️ 유효하지 않은 방 정보', invalidRooms.length, '개 정리 완료');
+    console.log('===============================================');
+}
+
+export async function requestClusters(clusters: SearchClusterList[]): Promise<void> {
+    for (const cluster of clusters) {
+        console.log(`🚀 ${cluster.pCortarNo} 권역 파싱 중...`);
+        const articlesInCluster = await getClusters(cluster);
+        for (const article of articlesInCluster) {
+            const requestParam: SearchArticleRequest = { ...article, ...cluster };
+            await requestArticles(requestParam);
+        }
+    }
 }
 
 export async function requestArticles(requestParam: SearchArticleRequest): Promise<void> {

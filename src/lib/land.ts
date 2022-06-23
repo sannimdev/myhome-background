@@ -1,5 +1,5 @@
 import axios, { AxiosResponse } from 'axios';
-import { ArticleResponse, Room, SearchArticleRequest, SearchClusterList } from '../type/land';
+import { ArticleInClusterList, ArticleResponse, Room, SearchArticleRequest, SearchClusterList } from '../type/land';
 import { getArticleDetailUrl, NAVER_ARTICLE_LIST_URL, NAVER_CLUSTER_LIST_URL, USER_AGENT_CHROME } from '../util/config';
 
 const headers = { 'User-Agent': USER_AGENT_CHROME };
@@ -55,14 +55,13 @@ export async function getArticleDetailImages(articleNo: number | string) {
     }
 }
 
-export async function getClusters(params: SearchClusterList) {
+export async function getClusters(params: SearchClusterList): Promise<ArticleInClusterList[]> {
     try {
         const response = await axios.get(NAVER_CLUSTER_LIST_URL, {
             params,
             headers,
         });
-        console.log(response.data);
-        return response.data;
+        return (response.data?.data?.ARTICLE as ArticleInClusterList[]) || [];
     } catch (e) {
         throw e;
     }

@@ -3,22 +3,22 @@ export interface SearchArticleRequest {
     itemId?: string;
     mapKey?: string;
     lgeo?: string;
-    rletTpCd: string;
-    tradTpCd: string;
-    z: string;
-    lat: string;
-    lon: string;
-    btm: string;
-    lft: string;
-    top: string;
-    rgt: string;
+    rletTpCd?: string;
+    tradTpCd?: string;
+    z: string | number;
+    lat: string | number;
+    lon: string | number;
+    btm?: string;
+    lft?: string;
+    top?: string;
+    rgt?: string;
     cortarNo?: string;
     pCortarNo?: string;
     showR0?: string;
     wprcMin?: string;
     wprcMax?: string;
-    spcMin: string;
-    spcMax: string;
+    spcMin?: string;
+    spcMax?: string;
     tag?: string;
     page?: string | number;
     sort?: SearchOrder;
@@ -38,7 +38,7 @@ export type SearchOrder =
 
 export interface SearchClusterList {
     view: string;
-    cortarNo: string;
+    cortarNo?: string;
     rletTpCd: string;
     tradTpCd: string;
     z: string;
@@ -48,10 +48,12 @@ export interface SearchClusterList {
     lft: string;
     top: string;
     rgt: string;
-    wprcMin: string;
-    wprcMax: string;
-    spcMin: string;
-    spcMax: string;
-    tag: string;
+    wprcMin?: string;
+    wprcMax?: string;
+    spcMin?: string;
+    spcMax?: string;
+    rprcMin?: string;
+    rprcMax?: string;
+    tag?: string;
     pCortarNo: string;
 }
