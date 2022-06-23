@@ -6,4 +6,5 @@ export type RoomDetail = {
         [key: string]: Object;
     };
     images: string[];
+    address?: string;
 };
