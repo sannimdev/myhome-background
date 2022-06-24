@@ -111,6 +111,9 @@ export async function writeDocumentsForRoomDetail(articleNo: number | string, co
         result.images = await getDetailImages(articleNo);
         console.log('    ', JSON.stringify(result.images, null, 3));
 
+        // 4. 주소
+        result.address = dom.querySelector('em.detail_info_branch')?.innerText.trim();
+
         IS_LOCAL_MACHINE
             ? await saveFile(`article-detail-${articleNo}-${Date.now()}.json`, JSON.stringify(result, null, 3))
             : await overwriteRoom(articleNo, result);
