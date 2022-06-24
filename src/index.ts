@@ -1,9 +1,8 @@
 import { requestClusterList } from './data/request';
 import { IS_LOCAL_MACHINE } from './lib/environment';
-import { getClusters } from './lib/land';
 import { openMongo, closeMongo } from './lib/mongo';
-import { cleanUpInvalidArticles, requestArticles, requestClusters } from './routine/article';
-import { SearchArticleRequest } from './type/land';
+import { cleanUpInvalidArticles, requestClusters } from './routine/article';
+import { getDetail } from './service/article';
 
 run();
 
@@ -33,12 +32,12 @@ async function runOnProduction() {
 
 async function runOnLocalMachine() {
     // ✂️ 필요한 부분만 빨리 로컬머신에서 돌릴 때
-    // const no = 2219494127;
-    // const response = await getDetail(no);
+    const no = 2219494127;
+    const response = await getDetail(no);
     // const images = await getDetailImages(no);
     // console.log('🚚', images);
     // const rooms = (await getRooms()) as Room[];
-    // console.log(response);
+    console.log(response);
     // 매물 정보 파싱
     // for (const cluster of requestClusterList) {
     //     const articles = await getClusters(cluster);
