@@ -1,6 +1,7 @@
 export const USER_AGENT_CHROME =
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.69 Safari/537.36';
 
+export const NAVER_ARTICLE_DETAIL_URL = 'https://m.land.naver.com/article/info';
 export const NAVER_ARTICLE_LIST_URL = 'https://m.land.naver.com/cluster/ajax/articleList';
 export const NAVER_CLUSTER_LIST_URL = 'https://m.land.naver.com/cluster/clusterList';
 export const OVERVIEW_IMAGE_URL = 'https://landthumb-phinf.pstatic.net/';

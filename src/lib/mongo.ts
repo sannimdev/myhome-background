@@ -30,6 +30,26 @@ export async function addDocument(collectionName: string, elements: any[]) {
     }
 }
 
+export async function getNewRooms(): Promise<Room[] | Error> {
+    try {
+        const db = client.db(dbName);
+        const collection = db.collection('room');
+        const currentStart = new Date();
+        currentStart.setHours(currentStart.getHours(), 0, 0, 0);
+        return collection
+            .find({
+                createdAt: { $gte: currentStart },
+                updatedAt: { $gte: currentStart },
+                deletedAt: { $exists: false },
+            })
+            .sort({ prc: 1, updatedAt: -1, createdAt: -1 })
+            .toArray() as Promise<Room[]>;
+    } catch (e) {
+        console.error('getNewRooms', e);
+        throw e;
+    }
+}
+
 export async function getRooms(): Promise<Room[] | Error> {
     try {
         const db = client.db(dbName);

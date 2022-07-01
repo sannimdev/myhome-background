@@ -23,13 +23,16 @@ export interface ArticleResponse {
 export interface Room {
     atclNo: string; // 매물 번호
     cortarNo: string; // 권역 번호
-    atclNm: ArticleTypes; // 매물 유형 (단독)
+    // atclNm: ArticleTypes | string; // 매물 유형 (단독)
+    atclNm: string;
     atclStatCd: string;
     rletTpCd: string;
     uprRletTpCd: string;
-    rletTpNm: RletTypes;
+    // rletTpNm: RletTypes | string;
+    rletTpNm: string;
     tradTpCd: /*전세*/ 'B1' | /*월세*/ 'B2'; // 매물 유형 코드
-    tradTpNm: TradeTypes; // 매물 유형 (전세)
+    // tradTpNm: TradeTypes | string; // 매물 유형 (전세)
+    tradTpNm: string;
     vrfcTpCd: 'OWNER' | 'DOC';
     flrInfo: string; // 층 정보 '해당층/최고층'
     prc: number; // 가격 (만)
