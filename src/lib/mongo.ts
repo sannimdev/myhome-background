@@ -1,11 +1,11 @@
 import { parse } from 'path';
-import { MongoClient, ObjectId } from 'mongodb';
+import { MongoClient } from 'mongodb';
 import dotenv from 'dotenv';
 import { Room, RoomDetail } from '../type/land';
 
 // Connection URL
 const { parsed: env } = dotenv.config({ path: `${parse(__dirname).dir}/../.env` });
-console.log('계정 =======================');
+console.log('loading mongo...');
 const id = env ? env.MONGODB_ID : process.env.MONGODB_ID;
 const pw = env ? env.MONGODB_PW : process.env.MONGODB_PW;
 const dbName = env ? env.MONGODB_NAME : process.env.MONGODB_NAME;
@@ -26,6 +26,26 @@ export async function addDocument(collectionName: string, elements: any[]) {
         return insertResult;
     } catch (e) {
         console.error('add Document', e);
+        throw e;
+    }
+}
+
+export async function getNewRooms(currentStart: Date = new Date()): Promise<Room[] | Error> {
+    try {
+        const db = client.db(dbName);
+        const collection = db.collection('room');
+        currentStart.setHours(currentStart.getUTCHours(), 0, 0, 0);
+        console.log(currentStart);
+        return collection
+            .find({
+                createdAt: { $gte: currentStart },
+                updatedAt: { $gte: currentStart },
+                deletedAt: { $exists: false },
+            })
+            .sort({ prc: 1, updatedAt: -1, createdAt: -1 })
+            .toArray() as Promise<Room[]>;
+    } catch (e) {
+        console.error('getNewRooms', e);
         throw e;
     }
 }
