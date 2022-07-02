@@ -71,15 +71,17 @@ export async function sendTelegramMessage(rooms: Room[]) {
         name: '이름',
         type: '유형',
         floor: '층',
-        price: '가격',
+        price: '보증금',
+        alpha: '관리비',
     };
     const messageRooms = rooms.map((room): { [key: string]: string } => ({
-        price: room.prc / 10000 + '억',
-        url: `${NAVER_ARTICLE_DETAIL_URL}/${room.atclNo}`,
-        address: room.myhomeRoomDetail?.address || '주소 없음',
         name: room.atclNm,
-        type: room.rletTpNm,
+        price: room.prc / 10000 + '억',
+        alpha: room.myhomeRoomDetail?.property['관리비'] || '',
+        url: `${NAVER_ARTICLE_DETAIL_URL}/${room.atclNo}`,
         floor: room.flrInfo,
+        type: room.rletTpNm,
+        address: room.myhomeRoomDetail?.address || '주소 없음',
     }));
     const length = messageRooms.length;
     let cnt = 0;
