@@ -38,7 +38,7 @@ export async function getNewRooms(currentStart: Date = new Date()): Promise<Room
         console.log(currentStart);
         return collection
             .find({
-                updatedAt: { $gte: currentStart },
+                createdAt: { $gte: currentStart },
                 deletedAt: { $exists: false },
             })
             .sort({ prc: 1, updatedAt: -1, createdAt: -1 })
