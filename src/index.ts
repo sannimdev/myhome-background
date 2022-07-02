@@ -1,9 +1,8 @@
-import { requestClusterList } from './data/request';
-import { IS_LOCAL_MACHINE } from './lib/environment';
+import { requestClusterList, requestParamSample3 } from './data/request';
 import { openMongo, closeMongo, getNewRooms } from './lib/mongo';
 import { sendMessage } from './lib/telegram';
 import { cleanUpInvalidArticles, getTodayNewRooms, requestClusters, sendTelegramMessage } from './routine/article';
-import { getDetail } from './service/article';
+import { getDetail, writeDocumentsForRoomDetail, getArticleList } from './service/article';
 import { Room } from './type/land';
 
 run();
@@ -25,38 +24,31 @@ async function run() {
 
 async function runOnProduction() {
     // 🏢🏢🏢🏢🏢🏢🏢🏢🏢🏢🏢🏢 정규 루틴 🏢🏢🏢🏢🏢🏢🏢🏢🏢🏢
-    // 1. 유효하지 않은 매물 삭제하기
-    await cleanUpInvalidArticles();
+    try {
+        const startTime = new Date();
+        await sendMessage('⛹️‍♂️ 지금 매물을 탐색하고 있어요');
 
-    // 2. 매물 목록 파싱하여 등록하기
-    await requestClusters(requestClusterList);
+        // 1. 유효하지 않은 매물 삭제하기
+        await cleanUpInvalidArticles();
 
-    // 3. 오늘 올라온 매물 가져오기
-    const newRooms = await getTodayNewRooms();
+        // 2. 매물 목록 파싱하여 등록하기
+        await requestClusters(requestClusterList);
 
-    // 4. 텔레그램 메시지 보내기
-    await sendTelegramMessage(newRooms);
+        // 3. 오늘 올라온 매물 가져오기
+        const newRooms = await getTodayNewRooms(startTime);
+
+        // 4. 텔레그램 메시지 보내기
+        await sendTelegramMessage(newRooms);
+    } catch (error) {
+        console.error(error);
+        console.error('오류가 발생되어 중단되었어요.');
+    }
 }
 
 async function runOnLocalMachine() {
-    const newRooms = await getTodayNewRooms();
-    await sendTelegramMessage(newRooms);
-
-    // ✂️ 필요한 부분만 빨리 로컬머신에서 돌릴 때\
-    // const response = await getDetail(no);
-    // const images = await getDetailImages(no);
-    // console.log('🚚', images);
-    // const rooms = (await getRooms()) as Room[];
-    // console.log(response);
-    // 매물 정보 파싱
-    // for (const cluster of requestClusterList) {
-    //     const articles = await getClusters(cluster);
-    //     for (const article of articles) {
-    //         const searchArticleRequest: SearchArticleRequest = {
-    //             ...article,
-    //             ...cluster,
-    //         };
-    //         await requestArticles(searchArticleRequest);
-    //     }
-    // }
+    const rooms: Room[] = await getArticleList(requestParamSample3);
+    for (const room of rooms) {
+        const articles = await getDetail(room.atclNo);
+        await writeDocumentsForRoomDetail(room.atclNo, articles);
+    }
 }

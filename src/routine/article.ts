@@ -50,8 +50,8 @@ export async function requestArticles(requestParam: SearchArticleRequest): Promi
     console.log(details.filter(({ status }) => status === 'fulfilled'));
 }
 
-export async function getTodayNewRooms() {
-    const newRooms = Array.prototype.slice.call(await getNewRooms()) as Room[];
+export async function getTodayNewRooms(currentStart: Date) {
+    const newRooms = Array.prototype.slice.call(await getNewRooms(currentStart)) as Room[];
     return newRooms.filter(
         (room) =>
             room.prc <= 20000 &&
@@ -74,12 +74,12 @@ export async function sendTelegramMessage(rooms: Room[]) {
         price: '가격',
     };
     const messageRooms = rooms.map((room): { [key: string]: string } => ({
+        price: room.prc / 10000 + '억',
         url: `${NAVER_ARTICLE_DETAIL_URL}/${room.atclNo}`,
         address: room.myhomeRoomDetail?.address || '주소 없음',
         name: room.atclNm,
         type: room.rletTpNm,
         floor: room.flrInfo,
-        price: room.prc / 10000 + '억',
     }));
     const length = messageRooms.length;
     let cnt = 0;
@@ -90,5 +90,8 @@ export async function sendTelegramMessage(rooms: Room[]) {
         await sendMessage(message.join('\n'));
         console.log(`🏠 매물 ${++cnt}/${length} 건 메시지 전송 완료`);
     }
-    length && (await sendMessage(`🏠 매물 ${length}건이 새로 등록되었어요. 위로 올려 한번 확인해보세요`));
+    const resultMessage = length
+        ? `🏠 매물 ${length}건이 새로 등록되었어요. 위로 올려 한번 확인해보세요`
+        : `🥲 아직 새롭게 올라온 매물이 없었어요`;
+    await sendMessage(resultMessage);
 }
