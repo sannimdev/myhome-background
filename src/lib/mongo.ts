@@ -35,11 +35,9 @@ export async function getNewRooms(currentStart: Date = new Date()): Promise<Room
         const db = client.db(dbName);
         const collection = db.collection('room');
         currentStart.setHours(currentStart.getUTCHours(), 0, 0, 0);
-        console.log(currentStart);
         return collection
             .find({
-                createdAt: { $gte: currentStart },
-                updatedAt: { $gte: currentStart },
+                createdAt: { $gte: currentStart.toUTCString() },
                 deletedAt: { $exists: false },
             })
             .sort({ prc: 1, updatedAt: -1, createdAt: -1 })
