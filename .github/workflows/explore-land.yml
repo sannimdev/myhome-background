@@ -5,8 +5,8 @@ on:
             - master
             - test-actions
     schedule:
-        # 정오, 18시 (GitHub Action은 UTC 타임존 기준임)
-        - cron: '30 3,9 * * *'
+        # 12시, 17시 (GitHub Action은 UTC 타임존 기준인데 실행 시 1.5시간 딜레이가 있는 듯하여 일정 앞으로 당김)
+        - cron: '30 1,6 30 * *'
 jobs:
     fetch:
         name: Fetch
