@@ -79,8 +79,8 @@ export async function sendNewRoomTelegramMessage(rooms: Room[]) {
         alpha: room.myhomeRoomDetail?.property['관리비'] || '',
         floor: room.flrInfo,
         url: `${NAVER_ARTICLE_DETAIL_URL}/${room.atclNo}`,
-        created: room.createdAt?.toLocaleString(),
-        updated: room.updatedAt?.toLocaleString(),
+        created: room.createdAt?.toLocaleString('ko-KR'),
+        updated: room.updatedAt?.toLocaleString('ko-KR'),
     }));
     const length = messageRooms.length;
     let cnt = 0;
@@ -128,8 +128,8 @@ export async function sendDeletedRoomTelegramMessage(rooms: Room[]) {
         moveInDate: room.myhomeRoomDetail?.property['입주가능날짜'] || '',
         createdAt: room.createdAt,
         deletedAt: room.deletedAt,
-        created: room.createdAt?.toLocaleString(),
-        deleted: room.deletedAt?.toLocaleString(),
+        created: room.createdAt?.toLocaleString('ko-KR'),
+        deleted: room.deletedAt?.toLocaleString('ko-KR'),
     }));
     const length = messageRooms.length;
     let cnt = 0;
