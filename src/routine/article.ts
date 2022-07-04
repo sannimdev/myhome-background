@@ -67,8 +67,10 @@ export async function sendNewRoomTelegramMessage(rooms: Room[]) {
         floor: '층',
         moveInDate: '입주가능날짜',
         url: '링크',
+        created: '등록일(추정)',
+        updated: '내용수정일(추정)',
     };
-    const messageRooms = rooms.map((room): { [key: string]: string } => ({
+    const messageRooms = rooms.map((room): { [key: string]: string | Date | undefined } => ({
         address: room.myhomeRoomDetail?.address || '주소 없음',
         type: room.rletTpNm,
         name: room.atclNm,
@@ -77,6 +79,8 @@ export async function sendNewRoomTelegramMessage(rooms: Room[]) {
         alpha: room.myhomeRoomDetail?.property['관리비'] || '',
         floor: room.flrInfo,
         url: `${NAVER_ARTICLE_DETAIL_URL}/${room.atclNo}`,
+        created: room.createdAt?.toLocaleString(),
+        updated: room.updatedAt?.toLocaleString(),
     }));
     const length = messageRooms.length;
     let cnt = 0;
@@ -141,6 +145,7 @@ export async function sendDeletedRoomTelegramMessage(rooms: Room[]) {
             const prefix = diffDays === 0 ? '당일에' : `${diffDays}일 만에`;
             message.push(`⌛ ${prefix} 나갔습니다`);
         }
+        message.unshift('❌😵 오늘 내가 놓친 매물');
         await sendMessage(message.join('\n'));
         console.log(`❌ 유효하지 않은 매물 ${++cnt}/${length} 건 메시지 전송 완료`);
     }

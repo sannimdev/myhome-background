@@ -59,8 +59,15 @@ async function runOnLocalMachine() {
     //     const articles = await getDetail(room.atclNo);
     //     await writeDocumentsForRoomDetail(room.atclNo, articles);
     // }
-    const created: Room[] = (await getNewRooms()) as Room[];
-    console.log(created.length);
-    const deleted: Room[] = (await getDeletedRooms()) as Room[];
-    console.log(deleted.map((room) => room.deletedAt));
+
+    // const created: Room[] = (await getNewRooms()) as Room[];
+    // console.log(created.length);
+    // const deleted: Room[] = (await getDeletedRooms()) as Room[];
+    // console.log(deleted.map((room) => room.deletedAt));
+
+    const startTime = new Date();
+    const newRooms = await getTodayNewRooms(startTime);
+
+    console.log(newRooms);
+    console.log(newRooms.length);
 }
