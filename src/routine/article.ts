@@ -1,5 +1,5 @@
 import { Room, SearchArticleRequest, SearchClusterList } from '../type/land';
-import { getNewRooms, getRooms, overwriteRooms } from '../lib/mongo';
+import { getDeletedRooms, getNewRooms, getRoom, getRooms, overwriteRooms } from '../lib/mongo';
 import { getArticleDetail, getClusters } from '../lib/land';
 import { getDetail } from '../service/article';
 import { writeDocumentsForRoomDetail } from '../service/article';
@@ -50,32 +50,27 @@ export async function requestArticles(requestParam: SearchArticleRequest): Promi
     console.log(details.filter(({ status }) => status === 'fulfilled'));
 }
 
-export async function getTodayNewRooms(currentStart: Date) {
-    const newRooms = Array.prototype.slice.call(await getNewRooms(currentStart)) as Room[];
-    return newRooms.filter(
-        (room) =>
-            room.prc <= 20000 &&
-            room.myhomeRoomDetail?.address?.startsWith('경기도 성남시') &&
-            (room.tagList.includes('융자금적은') || room.tagList.includes('융자금없는')) &&
-            !room.flrInfo.startsWith('B1/') &&
-            room.tradTpCd === 'B1'
-    );
+export async function getTodayNewRooms(currentDate: Date) {
+    const newRooms = Array.prototype.slice.call(await getNewRooms(currentDate)) as Room[];
+    return newRooms.filter((room) => getRoomFilterFunction(room));
 }
 
-export async function sendTelegramMessage(rooms: Room[]) {
+export async function sendNewRoomTelegramMessage(rooms: Room[]) {
     console.log('🚀 결과를 텔레그램으로 전송하려고 합니다.');
     // 메시지 만들기
     const col: { [key: string]: string } = {
-        url: '링크',
-        address: '주소',
         name: '이름',
-        type: '유형',
-        floor: '층',
         price: '보증금',
         alpha: '관리비',
+        address: '주소',
+        type: '유형',
+        floor: '층',
         moveInDate: '입주가능날짜',
+        url: '링크',
+        created: '등록일(추정)',
+        updated: '내용수정일(추정)',
     };
-    const messageRooms = rooms.map((room): { [key: string]: string } => ({
+    const messageRooms = rooms.map((room): { [key: string]: string | Date | undefined } => ({
         address: room.myhomeRoomDetail?.address || '주소 없음',
         type: room.rletTpNm,
         name: room.atclNm,
@@ -84,11 +79,13 @@ export async function sendTelegramMessage(rooms: Room[]) {
         alpha: room.myhomeRoomDetail?.property['관리비'] || '',
         floor: room.flrInfo,
         url: `${NAVER_ARTICLE_DETAIL_URL}/${room.atclNo}`,
+        created: room.createdAt?.toLocaleString('ko-KR'),
+        updated: room.updatedAt?.toLocaleString('ko-KR'),
     }));
     const length = messageRooms.length;
     let cnt = 0;
     for (const room of messageRooms) {
-        const message = Object.keys(room).reduce((result, key) => {
+        const message = Object.keys(col).reduce((result, key) => {
             return [...result, `${col[key]}: ${room[key]}`];
         }, [] as string[]);
         await sendMessage(message.join('\n'));
@@ -98,4 +95,71 @@ export async function sendTelegramMessage(rooms: Room[]) {
         ? `🏠 매물 ${length}건이 새로 등록되었어요. 위로 올려 한번 확인해보세요`
         : `🥲 아직 새롭게 올라온 매물이 없었어요`;
     await sendMessage(resultMessage);
+}
+
+export async function getTodayDeletedRooms(currentDate: Date) {
+    const deletedRooms = Array.prototype.slice.call(await getDeletedRooms(currentDate)) as Room[];
+    return deletedRooms.filter((room) => getRoomFilterFunction(room));
+}
+
+export async function sendDeletedRoomTelegramMessage(rooms: Room[]) {
+    console.log('😟 오늘 공고에서 내려간 매물을 찾고 있습니다');
+    // 메시지 만들기
+    const col: { [key: string]: string } = {
+        no: '매물번호',
+        address: '주소',
+        name: '이름',
+        type: '유형',
+        floor: '층',
+        price: '보증금',
+        alpha: '관리비',
+        moveInDate: '입주가능날짜',
+        created: '등록일(추정)',
+        deleted: '삭제일(추정)',
+    };
+    const messageRooms = rooms.map((room): { [key: string]: string | Date | undefined } => ({
+        address: room.myhomeRoomDetail?.address || '주소 없음',
+        no: room.atclNo,
+        name: room.atclNm,
+        type: room.rletTpNm,
+        floor: room.flrInfo,
+        price: room.prc / 10000 + '억',
+        alpha: room.myhomeRoomDetail?.property['관리비'] || '',
+        moveInDate: room.myhomeRoomDetail?.property['입주가능날짜'] || '',
+        createdAt: room.createdAt,
+        deletedAt: room.deletedAt,
+        created: room.createdAt?.toLocaleString('ko-KR'),
+        deleted: room.deletedAt?.toLocaleString('ko-KR'),
+    }));
+    const length = messageRooms.length;
+    let cnt = 0;
+    for (const room of messageRooms) {
+        const message = Object.keys(col).reduce((result, key) => {
+            return room[key] ? [...result, `${col[key]}: ${room[key]}`] : [...result];
+        }, [] as string[]);
+        const getTime = (date: Date | undefined) => new Date(date || 0).getTime();
+        const [deleted, created] = [getTime(room.deletedAt as Date), getTime(room.createdAt as Date)];
+        const diff = deleted - created;
+        const diffDays = Math.floor(diff / (86400 * 1000));
+        if (deleted !== 0 && created !== 0) {
+            const prefix = diffDays === 0 ? '당일에' : `${diffDays}일 만에`;
+            message.push(`⌛ ${prefix} 나갔습니다`);
+        }
+        message.unshift('❌😵 오늘 내가 놓친 매물');
+        await sendMessage(message.join('\n'));
+        console.log(`❌ 유효하지 않은 매물 ${++cnt}/${length} 건 메시지 전송 완료`);
+    }
+    if (length) {
+        await sendMessage(`🥲 아쉽게 놓친 매물 ${length}건을 찾았어요. 매물 회전율을 살펴볼까요?`);
+    }
+}
+
+function getRoomFilterFunction(room: Room) {
+    return (
+        room.prc <= 20000 &&
+        room.myhomeRoomDetail?.address?.startsWith('경기도 성남시') &&
+        (room.tagList.includes('융자금적은') || room.tagList.includes('융자금없는')) &&
+        !room.flrInfo.startsWith('B1/') &&
+        room.tradTpCd === 'B1'
+    );
 }

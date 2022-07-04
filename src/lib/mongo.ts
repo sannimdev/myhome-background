@@ -30,20 +30,37 @@ export async function addDocument(collectionName: string, elements: any[]) {
     }
 }
 
-export async function getNewRooms(currentStart: Date = new Date()): Promise<Room[] | Error> {
+export async function getNewRooms(currentDate: Date = new Date()): Promise<Room[] | Error> {
     try {
         const db = client.db(dbName);
         const collection = db.collection('room');
-        currentStart.setHours(currentStart.getUTCHours(), 0, 0, 0);
+        currentDate.setHours(currentDate.getHours() - 1, 0, 0, 0);
         return collection
             .find({
-                createdAt: { $gte: currentStart.toUTCString() },
+                createdAt: { $gte: new Date(currentDate.toISOString()) },
                 deletedAt: { $exists: false },
             })
             .sort({ prc: 1, updatedAt: -1, createdAt: -1 })
             .toArray() as Promise<Room[]>;
     } catch (e) {
         console.error('getNewRooms', e);
+        throw e;
+    }
+}
+
+export async function getDeletedRooms(currentDate: Date = new Date()): Promise<Room[] | Error> {
+    try {
+        const db = client.db(dbName);
+        const collection = db.collection('room');
+        currentDate.setHours(currentDate.getHours() - 1, 0, 0, 0);
+        return collection
+            .find({
+                deletedAt: { $gte: new Date(currentDate.toISOString()) },
+            })
+            .sort({ deletedAt: -1 })
+            .toArray() as Promise<Room[]>;
+    } catch (e) {
+        console.error('getDeletedRooms', e);
         throw e;
     }
 }
