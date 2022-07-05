@@ -18,8 +18,8 @@ async function run() {
     try {
         await openMongo();
 
-        await runOnLocalMachine();
-        // await runOnProduction();
+        // await runOnLocalMachine();
+        await runOnProduction();
     } catch (e) {
         console.error('run()', e);
     } finally {
@@ -51,6 +51,8 @@ async function runOnProduction() {
     } catch (error) {
         console.error(error);
         console.error('오류가 발생되어 중단되었어요.');
+        await sendMessage('❌ 부동산 탐색 중에 오류가 발생했어요...');
+        await sendMessage((error as Error).toString());
     }
 }
 
