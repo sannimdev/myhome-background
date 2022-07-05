@@ -142,7 +142,7 @@ export async function sendDeletedRoomTelegramMessage(rooms: Room[]) {
         const diff = deleted - created;
         const diffDays = Math.floor(diff / (86400 * 1000));
         if (deleted !== 0 && created !== 0) {
-            const prefix = diffDays === 0 ? '당일에' : `${diffDays}일 만에`;
+            const prefix = diffDays === 0 ? '하루 만에' : `${diffDays}일 만에`;
             message.push(`⌛ ${prefix} 나갔습니다`);
         }
         message.unshift('❌😵 오늘 내가 놓친 매물');
@@ -154,7 +154,7 @@ export async function sendDeletedRoomTelegramMessage(rooms: Room[]) {
     }
 }
 
-function getRoomFilterFunction(room: Room) {
+export function getRoomFilterFunction(room: Room) {
     return (
         room.prc <= 20000 &&
         room.myhomeRoomDetail?.address?.startsWith('경기도 성남시') &&
