@@ -3,6 +3,7 @@ import { openMongo, closeMongo, getNewRooms, getDeletedRooms } from './lib/mongo
 import { sendMessage } from './lib/telegram';
 import {
     cleanUpInvalidArticles,
+    getRoomFilterFunction,
     getTodayNewRooms,
     requestClusters,
     sendDeletedRoomTelegramMessage,
@@ -17,8 +18,8 @@ async function run() {
     try {
         await openMongo();
 
-        // await runOnLocalMachine();
-        await runOnProduction();
+        await runOnLocalMachine();
+        // await runOnProduction();
     } catch (e) {
         console.error('run()', e);
     } finally {
@@ -67,7 +68,6 @@ async function runOnLocalMachine() {
 
     const startTime = new Date();
     const newRooms = await getTodayNewRooms(startTime);
-
-    console.log(newRooms);
-    console.log(newRooms.length);
+    const filtered = newRooms.filter((room) => getRoomFilterFunction(room));
+    console.log(filtered, filtered.length);
 }

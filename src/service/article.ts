@@ -2,7 +2,7 @@ import { parse, HTMLElement } from 'node-html-parser';
 import { IS_LOCAL_MACHINE } from '../lib/environment';
 import { saveFile } from '../lib/file';
 import { getArticleDetail, getArticleDetailImages, getArticles } from '../lib/land';
-import { addDocument, overwriteRoom, overwriteRooms } from '../lib/mongo';
+import { addDocument, overwriteRooms, updateMyHomeRoomDetail } from '../lib/mongo';
 import { Room, RoomDetail, SearchArticleRequest } from '../type/land';
 
 async function sleep(ms: number = 0) {
@@ -116,7 +116,7 @@ export async function writeDocumentsForRoomDetail(articleNo: number | string, co
 
         IS_LOCAL_MACHINE
             ? await saveFile(`article-detail-${articleNo}-${Date.now()}.json`, JSON.stringify(result, null, 3))
-            : await overwriteRoom(articleNo, result);
+            : await updateMyHomeRoomDetail(articleNo, result);
 
         return true;
     } catch (e) {
