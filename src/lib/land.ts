@@ -1,6 +1,7 @@
 import axios, { AxiosResponse } from 'axios';
 import { ArticleInClusterList, ArticleResponse, Room, SearchArticleRequest, SearchClusterList } from '../type/land';
 import { getArticleDetailUrl, NAVER_ARTICLE_LIST_URL, NAVER_CLUSTER_LIST_URL, USER_AGENT_CHROME } from '../util/config';
+import { getUTCDate } from './date';
 
 const headers = { 'User-Agent': USER_AGENT_CHROME };
 
@@ -11,7 +12,7 @@ export async function getArticles(params: SearchArticleRequest, page = 1): Promi
             headers,
         });
         const rooms: Room[] = response.data.body || [];
-        return rooms.map((room) => ({ ...room, createdAt: new Date() }));
+        return rooms.map((room) => ({ ...room, createdAt: getUTCDate() }));
     } catch (e) {
         throw e;
     }

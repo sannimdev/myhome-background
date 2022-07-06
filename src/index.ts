@@ -1,9 +1,11 @@
 import { requestClusterList, requestParamSample3 } from './data/request';
+import { getUTCDate } from './lib/date';
 import { openMongo, closeMongo, getNewRooms, getDeletedRooms } from './lib/mongo';
 import { sendMessage } from './lib/telegram';
 import {
     cleanUpInvalidArticles,
     getRoomFilterFunction,
+    getTodayDeletedRooms,
     getTodayNewRooms,
     requestClusters,
     sendDeletedRoomTelegramMessage,
@@ -32,8 +34,8 @@ async function run() {
 async function runOnProduction() {
     // 🏢🏢🏢🏢🏢🏢🏢🏢🏢🏢🏢🏢 정규 루틴 🏢🏢🏢🏢🏢🏢🏢🏢🏢🏢
     try {
-        const startTime = new Date();
-        await sendMessage('⛹️‍♂️ 지금 매물을 탐색하고 있어요 (12시, 17시쯤)');
+        const startTime = getUTCDate();
+        await sendMessage('⛹️‍♂️ 지금 매물을 탐색하고 있어요. (정규: 12시/17시 10분)');
 
         // 1. 유효하지 않은 매물 삭제하기
         await cleanUpInvalidArticles();
@@ -42,7 +44,7 @@ async function runOnProduction() {
         await requestClusters(requestClusterList);
 
         // 3. 오늘 삭제된 매물 가져와서 텔레그램 메시지 보내기
-        const deletedRooms = (await getDeletedRooms(startTime)) as Room[];
+        const deletedRooms = await getTodayDeletedRooms(startTime);
         await sendDeletedRoomTelegramMessage(deletedRooms);
 
         // 4. 오늘 올라온 매물 가져와서 텔레그램 메시지 보내기
@@ -68,8 +70,11 @@ async function runOnLocalMachine() {
     // const deleted: Room[] = (await getDeletedRooms()) as Room[];
     // console.log(deleted.map((room) => room.deletedAt));
 
-    const startTime = new Date();
-    const newRooms = await getTodayNewRooms(startTime);
-    const filtered = newRooms.filter((room) => getRoomFilterFunction(room));
-    console.log(filtered, filtered.length);
+    const startTime = getUTCDate();
+    // const newRooms = await getTodayNewRooms(startTime);
+    // const filtered = newRooms.filter((room) => getRoomFilterFunction(room));
+    // console.log(filtered, filtered.length);
+
+    const deletedRooms = await getTodayDeletedRooms(startTime, 25);
+    await sendDeletedRoomTelegramMessage(deletedRooms);
 }

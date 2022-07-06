@@ -7,13 +7,10 @@ import { writeDocumentsForRooms } from '../service/article';
 import { getArticleList } from '../service/article';
 import { NAVER_ARTICLE_DETAIL_URL } from '../util/config';
 import { sendMessage } from '../lib/telegram';
+import { getKoreaTimezoneString, getUTCDate } from '../lib/date';
 
 export async function cleanUpInvalidArticles(): Promise<void> {
     const rooms = ((await getRooms()) as Room[]).filter((room) => !room?.deletedAt);
-    console.log(
-        rooms.length,
-        rooms.map((room) => room.atclNo)
-    );
     const invalidRooms = [];
     for (const room of rooms) {
         const response = await getArticleDetail(room.atclNo);
@@ -21,9 +18,9 @@ export async function cleanUpInvalidArticles(): Promise<void> {
             invalidRooms.push(room);
         }
     }
-    await overwriteRooms(invalidRooms.map((room) => ({ ...room, deletedAt: new Date() })) as Room[]);
-    console.log('✂️ 유효하지 않은 방 정보', invalidRooms.length, '개 정리 완료');
+    console.log(`✂️ 유효하지 않은 매물 ${invalidRooms.length}(/${rooms.length})개를 정리했습니다.`);
     console.log('===============================================');
+    await overwriteRooms(invalidRooms.map((room) => ({ ...room, deletedAt: getUTCDate() })) as Room[]);
 }
 
 export async function requestClusters(clusters: SearchClusterList[]): Promise<void> {
@@ -50,13 +47,13 @@ export async function requestArticles(requestParam: SearchArticleRequest): Promi
     console.log(details.filter(({ status }) => status === 'fulfilled'));
 }
 
-export async function getTodayNewRooms(currentDate: Date) {
-    const newRooms = Array.prototype.slice.call(await getNewRooms(currentDate)) as Room[];
+export async function getTodayNewRooms(currentDate: Date, hoursAgo: number = 1) {
+    const newRooms = Array.prototype.slice.call(await getNewRooms(currentDate, hoursAgo)) as Room[];
     return newRooms.filter((room) => getRoomFilterFunction(room));
 }
 
 export async function sendNewRoomTelegramMessage(rooms: Room[]) {
-    console.log('🚀 결과를 텔레그램으로 전송하려고 합니다.');
+    console.log('🚀 결과를 텔레그램으로 전송하겠습니다.');
     // 메시지 만들기
     const col: { [key: string]: string } = {
         name: '이름',
@@ -79,8 +76,8 @@ export async function sendNewRoomTelegramMessage(rooms: Room[]) {
         alpha: room.myhomeRoomDetail?.property['관리비'] || '',
         floor: room.flrInfo,
         url: `${NAVER_ARTICLE_DETAIL_URL}/${room.atclNo}`,
-        created: room.createdAt?.toLocaleString('ko-KR'),
-        updated: room.updatedAt?.toLocaleString('ko-KR'),
+        created: getKoreaTimezoneString(room.createdAt),
+        updated: getKoreaTimezoneString(room.updatedAt),
     }));
     const length = messageRooms.length;
     let cnt = 0;
@@ -97,8 +94,8 @@ export async function sendNewRoomTelegramMessage(rooms: Room[]) {
     await sendMessage(resultMessage);
 }
 
-export async function getTodayDeletedRooms(currentDate: Date) {
-    const deletedRooms = Array.prototype.slice.call(await getDeletedRooms(currentDate)) as Room[];
+export async function getTodayDeletedRooms(currentDate: Date, hoursAgo: number = 1) {
+    const deletedRooms = Array.prototype.slice.call(await getDeletedRooms(currentDate, hoursAgo)) as Room[];
     return deletedRooms.filter((room) => getRoomFilterFunction(room));
 }
 
@@ -128,16 +125,18 @@ export async function sendDeletedRoomTelegramMessage(rooms: Room[]) {
         moveInDate: room.myhomeRoomDetail?.property['입주가능날짜'] || '',
         createdAt: room.createdAt,
         deletedAt: room.deletedAt,
-        created: room.createdAt?.toLocaleString('ko-KR'),
-        deleted: room.deletedAt?.toLocaleString('ko-KR'),
+        created: getKoreaTimezoneString(room.createdAt),
+        deleted: getKoreaTimezoneString(room.deletedAt),
     }));
     const length = messageRooms.length;
+    console.log(messageRooms.length, '개의 유효하지 않은 매물...', messageRooms);
     let cnt = 0;
     for (const room of messageRooms) {
+        console.log(room.deletedAt, room.deleted);
         const message = Object.keys(col).reduce((result, key) => {
             return room[key] ? [...result, `${col[key]}: ${room[key]}`] : [...result];
         }, [] as string[]);
-        const getTime = (date: Date | undefined) => new Date(date || 0).getTime();
+        const getTime = (date: Date | undefined) => getUTCDate(date || new Date(0)).getTime();
         const [deleted, created] = [getTime(room.deletedAt as Date), getTime(room.createdAt as Date)];
         const diff = deleted - created;
         const diffDays = Math.floor(diff / (86400 * 1000));
@@ -156,7 +155,7 @@ export async function sendDeletedRoomTelegramMessage(rooms: Room[]) {
 
 export function getRoomFilterFunction(room: Room) {
     return (
-        room.prc <= 20000 &&
+        room.prc <= 25000 &&
         room.myhomeRoomDetail?.address?.startsWith('경기도 성남시') &&
         (room.tagList.includes('융자금적은') || room.tagList.includes('융자금없는')) &&
         !room.flrInfo.startsWith('B1/') &&
