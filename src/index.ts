@@ -3,6 +3,7 @@ import { openMongo, closeMongo, getNewRooms, getDeletedRooms } from './lib/mongo
 import { sendMessage } from './lib/telegram';
 import {
     cleanUpInvalidArticles,
+    getRoomFilterFunction,
     getTodayNewRooms,
     requestClusters,
     sendDeletedRoomTelegramMessage,
@@ -50,6 +51,8 @@ async function runOnProduction() {
     } catch (error) {
         console.error(error);
         console.error('오류가 발생되어 중단되었어요.');
+        await sendMessage('❌ 부동산 탐색 중에 오류가 발생했어요...');
+        await sendMessage((error as Error).toString());
     }
 }
 
@@ -67,7 +70,6 @@ async function runOnLocalMachine() {
 
     const startTime = new Date();
     const newRooms = await getTodayNewRooms(startTime);
-
-    console.log(newRooms);
-    console.log(newRooms.length);
+    const filtered = newRooms.filter((room) => getRoomFilterFunction(room));
+    console.log(filtered, filtered.length);
 }

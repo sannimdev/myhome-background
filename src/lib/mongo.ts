@@ -98,7 +98,7 @@ export async function overwriteRooms(rooms: Room[]) {
             if (!!mongoRoom)
                 await collection.updateOne(
                     { atclNo: room.atclNo + '' },
-                    { $set: { ...room, _id: mongoRoom._id, updatedAt: new Date() } }
+                    { $set: { ...room, _id: mongoRoom._id, updatedAt: new Date(), createdAt: mongoRoom.createdAt } }
                 );
             else await collection.insertOne(room);
         }
@@ -109,7 +109,7 @@ export async function overwriteRooms(rooms: Room[]) {
 }
 
 // 매물 상세 정보 파싱 시 최신데이터 결합하여 덮어쓰기
-export async function overwriteRoom(articleNo: number | string, myhomeRoomDetail: RoomDetail) {
+export async function updateMyHomeRoomDetail(articleNo: number | string, myhomeRoomDetail: RoomDetail) {
     try {
         const db = client.db(dbName);
         const collection = db.collection('room');
@@ -118,7 +118,13 @@ export async function overwriteRoom(articleNo: number | string, myhomeRoomDetail
             await collection.updateOne(
                 { atclNo: articleNo + '' },
                 {
-                    $set: { ...room, myhomeRoomDetail, _id: room._id, updatedAt: new Date() },
+                    $set: {
+                        ...room,
+                        myhomeRoomDetail,
+                        _id: room._id,
+                        updatedAt: new Date(),
+                        createdAt: room.createdAt,
+                    },
                 }
             );
         }
