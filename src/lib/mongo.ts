@@ -2,6 +2,7 @@ import { parse } from 'path';
 import { MongoClient } from 'mongodb';
 import dotenv from 'dotenv';
 import { Room, RoomDetail } from '../type/land';
+import { getUTCDate } from './date';
 
 // Connection URL
 const { parsed: env } = dotenv.config({ path: `${parse(__dirname).dir}/../.env` });
@@ -30,11 +31,11 @@ export async function addDocument(collectionName: string, elements: any[]) {
     }
 }
 
-export async function getNewRooms(currentDate: Date = new Date()): Promise<Room[] | Error> {
+export async function getNewRooms(currentDate: Date = getUTCDate(), hoursAgo: number = 1): Promise<Room[] | Error> {
     try {
         const db = client.db(dbName);
         const collection = db.collection('room');
-        currentDate.setHours(currentDate.getHours() - 1, 0, 0, 0);
+        currentDate.setHours(currentDate.getHours() - hoursAgo, 0, 0, 0);
         return collection
             .find({
                 createdAt: { $gte: new Date(currentDate.toISOString()) },
@@ -48,11 +49,11 @@ export async function getNewRooms(currentDate: Date = new Date()): Promise<Room[
     }
 }
 
-export async function getDeletedRooms(currentDate: Date = new Date()): Promise<Room[] | Error> {
+export async function getDeletedRooms(currentDate: Date = getUTCDate(), hoursAgo: number = 1): Promise<Room[] | Error> {
     try {
         const db = client.db(dbName);
         const collection = db.collection('room');
-        currentDate.setHours(currentDate.getHours() - 1, 0, 0, 0);
+        currentDate.setHours(currentDate.getHours() - hoursAgo, 0, 0, 0);
         return collection
             .find({
                 deletedAt: { $gte: new Date(currentDate.toISOString()) },
@@ -98,7 +99,7 @@ export async function overwriteRooms(rooms: Room[]) {
             if (!!mongoRoom)
                 await collection.updateOne(
                     { atclNo: room.atclNo + '' },
-                    { $set: { ...room, _id: mongoRoom._id, updatedAt: new Date(), createdAt: mongoRoom.createdAt } }
+                    { $set: { ...room, _id: mongoRoom._id, updatedAt: getUTCDate(), createdAt: mongoRoom.createdAt } }
                 );
             else await collection.insertOne(room);
         }
@@ -122,7 +123,7 @@ export async function updateMyHomeRoomDetail(articleNo: number | string, myhomeR
                         ...room,
                         myhomeRoomDetail,
                         _id: room._id,
-                        updatedAt: new Date(),
+                        updatedAt: getUTCDate(),
                         createdAt: room.createdAt,
                     },
                 }
