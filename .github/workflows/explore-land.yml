@@ -5,8 +5,8 @@ on:
             - master
             - test-actions
     schedule:
-        # 12시, 17시 (GitHub Action은 UTC 타임존 기준인데 실행 시가 있는 듯하여 일정 앞으로 당김)
-        - cron: '0 2,5 * * *'
+        # 12시, 17시 10분
+        - cron: '10 2,8 * * *'
 jobs:
     fetch:
         name: Fetch
