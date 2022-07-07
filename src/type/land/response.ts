@@ -30,7 +30,7 @@ export interface Room {
     uprRletTpCd: string;
     // rletTpNm: RletTypes | string;
     rletTpNm: string;
-    tradTpCd: /*전세*/ 'B1' | /*월세*/ 'B2'; // 매물 유형 코드
+    tradTpCd: /*매매*/ 'A1' | /*전세*/ 'B1' | /*월세*/ 'B2'; // 매물 유형 코드
     // tradTpNm: TradeTypes | string; // 매물 유형 (전세)
     tradTpNm: string;
     vrfcTpCd: 'OWNER' | 'DOC';
