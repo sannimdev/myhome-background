@@ -27,3 +27,6 @@ jobs:
                   MONGODB_PW: ${{ secrets.MONGODB_PW }}
                   TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
                   TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+                  TELEGRAM_MY_CHAT_ID: ${{ secrets.TELEGRAM_MY_CHAT_ID }}
+                  TELEGRAM_Y_CHAT_ID: ${{ secrets.TELEGRAM_Y_CHAT_ID }}
+                  TELEGRAM_BIN_CHAT_ID: ${{ secrets.TELEGRAM_BIN_CHAT_ID }}
