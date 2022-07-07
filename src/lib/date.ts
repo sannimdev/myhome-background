@@ -4,5 +4,5 @@ export function getUTCDate(date: Date = new Date()): Date {
 
 export function getKoreaTimezoneString(date: Date | undefined) {
     if (!date) return '';
-    return date.toLocaleString('ko-KR');
+    return new Date(date.toUTCString()).toLocaleString('ko-KR');
 }
