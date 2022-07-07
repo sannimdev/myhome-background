@@ -110,7 +110,7 @@ export async function sendDeletedRoomTelegramMessage(rooms: Room[]) {
         floor: '층',
         price: '보증금',
         alpha: '관리비',
-        moveInDate: '입주가능날짜',
+        moveInDate: '입주가능일',
         created: '등록일(추정)',
         deleted: '삭제일(추정)',
     };
@@ -122,7 +122,7 @@ export async function sendDeletedRoomTelegramMessage(rooms: Room[]) {
         floor: room.flrInfo,
         price: room.prc / 10000 + '억',
         alpha: room.myhomeRoomDetail?.property['관리비'] || '',
-        moveInDate: room.myhomeRoomDetail?.property['입주가능날짜'] || '',
+        moveInDate: room.myhomeRoomDetail?.property['입주가능일'] || '',
         createdAt: room.createdAt,
         deletedAt: room.deletedAt,
         created: getKoreaTimezoneString(room.createdAt),
