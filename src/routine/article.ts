@@ -139,9 +139,9 @@ export async function sendDeletedRoomTelegramMessage(rooms: Room[]) {
         const getTime = (date: Date | undefined) => getUTCDate(date || new Date(0)).getTime();
         const [deleted, created] = [getTime(room.deletedAt as Date), getTime(room.createdAt as Date)];
         const diff = deleted - created;
-        const diffDays = Math.floor(diff / (86400 * 1000));
+        const diffDays = Math.floor(diff / (86400 * 1000)) + 1;
         if (deleted !== 0 && created !== 0) {
-            const prefix = diffDays === 0 ? '하루 만에' : `${diffDays}일 만에`;
+            const prefix = diffDays === 1 ? '하루 만에' : `${diffDays}일 만에`;
             message.push(`⌛ ${prefix} 나갔습니다`);
         }
         message.unshift('❌😵 오늘 내가 놓친 매물');
