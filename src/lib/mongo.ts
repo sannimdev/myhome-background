@@ -19,7 +19,6 @@ export const closeMongo = async () => client.close();
 
 export async function addDocument(collectionName: string, elements: any[]) {
     try {
-        console.log('Connected successfully to server');
         const db = client.db(dbName);
         const collection = db.collection(collectionName);
         // the following code examples can be pasted here...
@@ -27,6 +26,24 @@ export async function addDocument(collectionName: string, elements: any[]) {
         return insertResult;
     } catch (e) {
         console.error('add Document', e);
+        throw e;
+    }
+}
+
+export async function deleteDocuments(collectionName: string, elements: any[]) {
+    try {
+        const db = client.db(dbName);
+        const collection = db.collection(collectionName);
+        const deletedResult = [];
+        for (const element of elements) {
+            console.log(element, '삭제');
+            const result = await collection.deleteOne(element);
+            deletedResult.push(result);
+        }
+        console.log(deletedResult);
+        return true;
+    } catch (e) {
+        console.error('delete Document', e);
         throw e;
     }
 }

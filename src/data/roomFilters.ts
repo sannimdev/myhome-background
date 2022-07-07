@@ -13,7 +13,7 @@ export function getMyRoomFilterFunction(room: Room): boolean {
 
 export function getYRoomFilterFunction(room: Room): boolean {
     return (
-        (room.prc <= 19000 &&
+        (room.prc <= 15000 &&
             room.myhomeRoomDetail?.address?.startsWith('경기도 용인시') &&
             room.tagList.includes('융자금없는') &&
             !room.flrInfo.startsWith('B1/') &&
@@ -28,7 +28,7 @@ export function getBinRoomFilterFunction(room: Room): boolean {
             room.myhomeRoomDetail?.address?.startsWith('인천시 부평구') &&
             room.tagList.includes('융자금없는') &&
             !room.flrInfo.startsWith('B1/') &&
-            room.tradTpCd === 'A1') ||
+            room.tradTpCd === 'B1') ||
         false
     );
 }

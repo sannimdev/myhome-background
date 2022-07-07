@@ -1,8 +1,8 @@
 import { configs, ICC_CHAT_ID } from './data/config';
 import { requestClusterList } from './data/request';
-import { sleep } from './lib/common';
+import { diffTimes, sleep } from './lib/common';
 import { getKoreaTimezoneString, getUTCDate } from './lib/date';
-import { openMongo, closeMongo } from './lib/mongo';
+import { openMongo, closeMongo, deleteDocuments } from './lib/mongo';
 import { sendMessage } from './lib/telegram';
 import {
     cleanUpInvalidArticles,
@@ -12,6 +12,8 @@ import {
     sendDeletedRoomTelegramMessage,
     sendNewRoomTelegramMessage,
 } from './routine/article';
+import { Room } from './type/land';
+import { deleteLands } from './util/macro';
 
 run();
 
@@ -24,6 +26,7 @@ async function run() {
         console.error('run()', e);
     } finally {
         //////////////////////////////// 프로세스 종료 명시적으로 해야 종료됨.
+        console.log('====================== 프로그램 실행 끝');
         await closeMongo();
         process.exit();
     }
@@ -31,18 +34,22 @@ async function run() {
 
 async function runOnProduction() {
     // 🏢🏢🏢🏢🏢🏢🏢🏢🏢🏢🏢🏢 정규 루틴 🏢🏢🏢🏢🏢🏢🏢🏢🏢🏢
-    const startTime: string = getKoreaTimezoneString();
+    const launchedTime = getUTCDate();
     console.time('runOnProduction');
-    await sendMessage(ICC_CHAT_ID, `부동산 매물 파싱 작업을 시작합니다.\n${startTime}`);
+    await sendMessage(ICC_CHAT_ID, `부동산 매물 파싱 작업을 시작합니다.\n${getKoreaTimezoneString(launchedTime)}`);
 
-    // 1. 유효하지 않은 매물 삭제하기
-    await sendMessage(ICC_CHAT_ID, `❌ 유효하지 않은 매물을 삭제하겠습니다.`);
+    // 1. 유효하지 않은 매물 정리하기
+    console.log('유효하지 않은 매물 정리하기');
+    await sendMessage(ICC_CHAT_ID, `❌ 유효하지 않은 매물을 정리하겠습니다.`);
     await cleanUpInvalidArticles();
 
     // // 2. 매물 목록 파싱하여 등록하기
     const targets = configs.map(({ id }) => id);
     await sendMessage(ICC_CHAT_ID, `👏 이제 매물을 파싱하겠습니다. (${targets.join(', ')})`);
+    const parsingStartTime = getUTCDate();
     await requestClusters(requestClusterList);
+    const parsingDiff = diffTimes(parsingStartTime, getUTCDate());
+    await sendMessage(ICC_CHAT_ID, `⏱️ 파싱하는 데 ${parsingDiff}!`);
 
     for (const { id, filterFunction, chatId } of configs) {
         if (!filterFunction || !chatId) continue;
@@ -68,6 +75,10 @@ async function runOnProduction() {
             await sendMessage(chatId, (error as Error).toString());
         }
     }
+    const launchDiff = diffTimes(launchedTime, getUTCDate());
+    const messages = ['매물 수집 완료', getKoreaTimezoneString(), launchDiff];
+    await sendMessage(ICC_CHAT_ID, messages.join('\n'));
+
     console.timeEnd('runOnProduction');
 }
 

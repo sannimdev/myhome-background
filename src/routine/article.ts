@@ -8,6 +8,7 @@ import { getArticleList } from '../service/article';
 import { NAVER_ARTICLE_DETAIL_URL } from '../util/naverland';
 import { sendMessage } from '../lib/telegram';
 import { getKoreaTimezoneString, getUTCDate } from '../lib/date';
+import { sleep } from '../lib/common';
 
 export async function cleanUpInvalidArticles(): Promise<void> {
     const rooms = ((await getRooms()) as Room[]).filter((room) => !room?.deletedAt);
@@ -61,6 +62,7 @@ export async function sendNewRoomTelegramMessage(rooms: Room[], chatId: string) 
         alpha: '관리비',
         address: '주소',
         type: '유형',
+        area: '공급/전용면적',
         floor: '층',
         moveInDate: '입주가능일',
         url: '링크',
@@ -70,6 +72,7 @@ export async function sendNewRoomTelegramMessage(rooms: Room[], chatId: string) 
     const messageRooms = rooms.map((room): { [key: string]: string | Date | undefined } => ({
         address: room.myhomeRoomDetail?.address || '주소 없음',
         type: room.rletTpNm,
+        area: room.myhomeRoomDetail?.property['공급/전용면적'] || '',
         name: room.atclNm,
         price: room.prc / 10000 + '억',
         moveInDate: room.myhomeRoomDetail?.property['입주가능일'] || '',
@@ -87,6 +90,9 @@ export async function sendNewRoomTelegramMessage(rooms: Room[], chatId: string) 
         }, [] as string[]);
         await sendMessage(chatId, message.join('\n'));
         console.log(`🏠 매물 ${++cnt}/${length} 건 메시지 전송 완료`);
+        if (cnt % 10 === 0) {
+            sleep(200000);
+        }
     }
     const resultMessage = length
         ? `🏠 매물 ${length}건이 새로 등록되었어요. 위로 올려 한번 확인해보세요`
@@ -107,6 +113,7 @@ export async function sendDeletedRoomTelegramMessage(rooms: Room[], chatId: stri
         address: '주소',
         name: '이름',
         type: '유형',
+        area: '공급/전용면적',
         floor: '층',
         price: '보증금',
         alpha: '관리비',
@@ -119,6 +126,7 @@ export async function sendDeletedRoomTelegramMessage(rooms: Room[], chatId: stri
         no: room.atclNo,
         name: room.atclNm,
         type: room.rletTpNm,
+        area: room.myhomeRoomDetail?.property['공급/전용면적'] || '',
         floor: room.flrInfo,
         price: room.prc / 10000 + '억',
         alpha: room.myhomeRoomDetail?.property['관리비'] || '',

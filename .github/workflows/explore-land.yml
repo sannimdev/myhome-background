@@ -6,7 +6,7 @@ on:
             - test-actions
     schedule:
         # 12시, 17시 10분
-        - cron: '30 1,7 * * *'
+        - cron: '10 1,8 * * *'
 jobs:
     fetch:
         name: Fetch
