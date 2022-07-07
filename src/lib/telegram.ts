@@ -23,9 +23,10 @@ export const sendMessage = async (chatId: string | number, message: string | num
             message: encodeURI(String(message)),
         });
         const { data } = await axios.get(url);
-        sleep(3000);
+        sleep(1000);
         return data;
     } catch (error) {
         console.error(error);
+        sleep(10000);
     }
 };
