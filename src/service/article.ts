@@ -1,13 +1,10 @@
 import { parse, HTMLElement } from 'node-html-parser';
-import { IS_LOCAL_MACHINE } from '../lib/environment';
+import { sleep } from '../lib/common';
+import { IS_LOCAL_MACHINE } from '../data/environment';
 import { saveFile } from '../lib/file';
 import { getArticleDetail, getArticleDetailImages, getArticles } from '../lib/land';
 import { addDocument, overwriteRooms, updateMyHomeRoomDetail } from '../lib/mongo';
 import { Room, RoomDetail, SearchArticleRequest } from '../type/land';
-
-async function sleep(ms: number = 0) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-}
 
 export async function getArticleList(requestParam: SearchArticleRequest, maxPage = Number.MAX_SAFE_INTEGER) {
     try {

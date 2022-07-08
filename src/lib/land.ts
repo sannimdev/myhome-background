@@ -1,6 +1,11 @@
 import axios, { AxiosResponse } from 'axios';
 import { ArticleInClusterList, ArticleResponse, Room, SearchArticleRequest, SearchClusterList } from '../type/land';
-import { getArticleDetailUrl, NAVER_ARTICLE_LIST_URL, NAVER_CLUSTER_LIST_URL, USER_AGENT_CHROME } from '../util/config';
+import {
+    getArticleDetailUrl,
+    NAVER_ARTICLE_LIST_URL,
+    NAVER_CLUSTER_LIST_URL,
+    USER_AGENT_CHROME,
+} from '../util/naverland';
 import { getUTCDate } from './date';
 
 const headers = { 'User-Agent': USER_AGENT_CHROME };
