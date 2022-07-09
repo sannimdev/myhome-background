@@ -15,12 +15,10 @@ export async function getArticleList(requestParam: SearchArticleRequest, maxPage
             Object.assign(rooms, [...rooms, ...room]);
             page += 1;
             if (room.length === 20) {
-                console.log(
-                    `    🚚 매물 목록 중 ${page - 1}페이지 수집을 종료하고 다음 ${page}페이지 정보를 수집합니다`
-                );
-                await sleep(1000);
+                console.log(`    🚚 매물 목록 중 ${page - 1}페이지 수집을 종료. ${page}페이지 정보를 수집합니다`);
+                await sleep(Math.round(Math.random() * 1000 + 500));
             } else {
-                console.log('    🚧 매물 목록 수집을 종료합니다...');
+                console.log(`    🚧 ${requestParam.cortarNo} 매물 목록 수집을 종료합니다...`);
                 break;
             }
         }
