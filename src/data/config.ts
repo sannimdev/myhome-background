@@ -5,6 +5,8 @@ import { getBinRoomFilterFunction, getMyRoomFilterFunction, getYRoomFilterFuncti
 const { parsed: env } = dotenv.config({ path: `${parse(__dirname).dir}/../.env` });
 const getProcessEnv = (key: string) => (env ? env[key] : process.env[key]);
 export const ICC_CHAT_ID: string = getProcessEnv('TELEGRAM_CHAT_ID') || '';
+export const COLLECTION_ROOM = 'room';
+export const COLLECTION_ROOM_DELETED = 'room_deleted';
 
 type Config = {
     id: string;
