@@ -1,8 +1,8 @@
-import { configs, ICC_CHAT_ID } from './data/config';
+import { COLLECTION_ROOM, COLLECTION_ROOM_DELETED, configs, ICC_CHAT_ID } from './data/config';
 import { requestClusterList } from './data/request';
 import { diffTimes, sleep } from './lib/common';
 import { getKoreaTimezoneString, getUTCDate } from './lib/date';
-import { openMongo, closeMongo, deleteDocuments } from './lib/mongo';
+import { openMongo, closeMongo, deleteDocuments, getDeletedRooms, moveInDocuments } from './lib/mongo';
 import { sendMessage } from './lib/telegram';
 import {
     cleanUpInvalidArticles,
@@ -20,8 +20,8 @@ run();
 async function run() {
     try {
         await openMongo();
-        await runOnProduction();
-        // await runOnLocalMachine();
+        // await runOnProduction();
+        await runOnLocalMachine();
     } catch (e) {
         console.error('run()', e);
     } finally {
@@ -82,4 +82,12 @@ async function runOnProduction() {
     console.timeEnd('runOnProduction');
 }
 
-async function runOnLocalMachine() {}
+async function runOnLocalMachine() {
+    try {
+        const dRooms = await getDeletedRooms(new Date(), 9999999);
+        const deletedRooms = Array.prototype.slice.call(dRooms);
+        await moveInDocuments(COLLECTION_ROOM, COLLECTION_ROOM_DELETED, deletedRooms);
+    } catch (error) {
+        console.error('runOnLocalMachine', error);
+    }
+}
