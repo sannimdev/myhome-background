@@ -50,6 +50,16 @@ export async function deleteDocuments(collectionName: string, elements: any[]) {
     }
 }
 
+export async function moveInDocuments(fromCollectionName: string, toCollectionName: string, elements: any[]) {
+    try {
+        await addDocument(toCollectionName, elements);
+        await deleteDocuments(fromCollectionName, elements);
+    } catch (e) {
+        console.error('moveInDocuments', e);
+        throw e;
+    }
+}
+
 export async function getNewRooms(currentDate: Date = getUTCDate(), hoursAgo: number = 1): Promise<Room[] | Error> {
     try {
         return accessMongo(COLLECTION_ROOM, (collection) => {
