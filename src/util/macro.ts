@@ -1,4 +1,4 @@
-import { deleteDocuments } from '../lib/mongo';
+import { removeDocuments } from '../lib/mongo';
 import { getUTCDate } from '../lib/date';
 import { getTodayNewRooms } from '../routine/article';
 import { Room } from '../type/land';
@@ -11,5 +11,5 @@ export async function deleteLands(startsAddressWith: string) {
     );
     const elements = newRooms.map(({ atclNo }) => ({ atclNo }));
     console.log(elements);
-    await deleteDocuments('room', elements);
+    await removeDocuments('room', elements);
 }

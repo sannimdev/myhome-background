@@ -1,5 +1,5 @@
 import { Room, SearchArticleRequest, SearchClusterList } from '../type/land';
-import { getDeletedRooms, getNewRooms, getRooms, overwriteRooms } from '../lib/mongo';
+import { addDocuments, getDeletedRooms, getNewRooms, getRooms, removeDocuments } from '../lib/mongo';
 import { getArticleDetail, getClusters } from '../lib/land';
 import { getDetail } from '../service/article';
 import { writeDocumentsForRoomDetail } from '../service/article';
@@ -9,6 +9,7 @@ import { NAVER_ARTICLE_DETAIL_URL } from '../util/naverland';
 import { sendMessage } from '../lib/telegram';
 import { getKoreaTimezoneString, getUTCDate } from '../lib/date';
 import { sleep } from '../lib/common';
+import { COLLECTION_ROOM, COLLECTION_ROOM_DELETED } from '../data/config';
 
 export async function cleanUpInvalidArticles(): Promise<void> {
     const rooms = ((await getRooms()) as Room[]).filter((room) => !room?.deletedAt);
@@ -21,7 +22,9 @@ export async function cleanUpInvalidArticles(): Promise<void> {
     }
     console.log(`✂️ 유효하지 않은 매물 ${invalidRooms.length}(/${rooms.length})개를 정리했습니다.`);
     console.log('===============================================');
-    await overwriteRooms(invalidRooms.map((room) => ({ ...room, deletedAt: getUTCDate() })) as Room[]);
+    const deletedRooms = invalidRooms.map((room) => ({ ...room, deletedAt: getUTCDate() }));
+    await removeDocuments(COLLECTION_ROOM, invalidRooms);
+    await addDocuments(COLLECTION_ROOM_DELETED, deletedRooms);
 }
 
 export async function requestClusters(clusters: SearchClusterList[]): Promise<void> {
@@ -140,7 +143,6 @@ export async function sendDeletedRoomTelegramMessage(rooms: Room[], chatId: stri
     console.log(messageRooms.length, '개의 유효하지 않은 매물...', messageRooms);
     let cnt = 0;
     for (const room of messageRooms) {
-        console.log(room.deletedAt, room.deleted);
         const message = Object.keys(col).reduce((result, key) => {
             return room[key] ? [...result, `${col[key]}: ${room[key]}`] : [...result];
         }, [] as string[]);

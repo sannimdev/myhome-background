@@ -2,7 +2,7 @@ import { COLLECTION_ROOM, COLLECTION_ROOM_DELETED, configs, ICC_CHAT_ID } from '
 import { requestClusterList } from './data/request';
 import { diffTimes, sleep } from './lib/common';
 import { getKoreaTimezoneString, getUTCDate } from './lib/date';
-import { openMongo, closeMongo, deleteDocuments, getDeletedRooms, moveInDocuments } from './lib/mongo';
+import { openMongo, closeMongo, getDeletedRooms, moveInDocuments } from './lib/mongo';
 import { sendMessage } from './lib/telegram';
 import {
     cleanUpInvalidArticles,
@@ -20,8 +20,8 @@ run();
 async function run() {
     try {
         await openMongo();
-        // await runOnProduction();
-        await runOnLocalMachine();
+        await runOnProduction();
+        // await runOnLocalMachine();
     } catch (e) {
         console.error('run()', e);
     } finally {
@@ -83,11 +83,13 @@ async function runOnProduction() {
 }
 
 async function runOnLocalMachine() {
-    try {
-        const dRooms = await getDeletedRooms(new Date(), 9999999);
-        const deletedRooms = Array.prototype.slice.call(dRooms);
-        await moveInDocuments(COLLECTION_ROOM, COLLECTION_ROOM_DELETED, deletedRooms);
-    } catch (error) {
-        console.error('runOnLocalMachine', error);
-    }
+    // try {
+    //     await cleanUpInvalidArticles();
+    //     // 오늘 삭제된 매물 가져와서 텔레그램 메시지 보내기
+    //     const startTime = getUTCDate();
+    //     const deletedRooms = await getTodayDeletedRooms(startTime, configs[0].filterFunction, 1);
+    //     await sendDeletedRoomTelegramMessage(deletedRooms, configs[0].chatId || '');
+    // } catch (e) {
+    //     console.error('runOnLocalMachine', e);
+    // }
 }
