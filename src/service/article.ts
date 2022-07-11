@@ -3,7 +3,7 @@ import { sleep } from '../lib/common';
 import { IS_LOCAL_MACHINE } from '../data/environment';
 import { saveFile } from '../lib/file';
 import { getArticleDetail, getArticleDetailImages, getArticles } from '../lib/land';
-import { addDocument, overwriteRooms, updateMyHomeRoomDetail } from '../lib/mongo';
+import { addDocuments, overwriteRooms, updateMyHomeRoomDetail } from '../lib/mongo';
 import { Room, RoomDetail, SearchArticleRequest } from '../type/land';
 
 export async function getArticleList(requestParam: SearchArticleRequest, maxPage = Number.MAX_SAFE_INTEGER) {
@@ -33,7 +33,7 @@ export async function writeDocumentsForRooms(rooms: Room[]) {
     if (IS_LOCAL_MACHINE) {
         await saveFile(`article-list-${Date.now()}.json`, JSON.stringify(rooms, null, 4));
     } else {
-        await addDocument('daily', rooms);
+        await addDocuments('daily', rooms);
         await overwriteRooms(rooms);
     }
 }
