@@ -16,7 +16,7 @@ export async function getArticleList(requestParam: SearchArticleRequest, maxPage
             page += 1;
             if (room.length === 20) {
                 console.log(`    🚚 매물 목록 중 ${page - 1}페이지 수집을 종료. ${page}페이지 정보를 수집합니다`);
-                await sleep(Math.round(Math.random() * 1000 + 500));
+                await sleep(Math.round(Math.random() * 1800));
             } else {
                 console.log(`    🚧 매물 목록 수집을 종료합니다...`);
                 break;
@@ -78,7 +78,8 @@ export async function writeDocumentsForRoomDetail(articleNo: number | string, co
         for (const node of details) {
             const key = node.querySelector('.detail_cell_title')?.innerText || '';
             const value = node.querySelector('.detail_cell_data')?.innerText || '';
-            if (key) property[key] = value;
+            const description = dom.querySelector('.detail_description_text')?.innerText || '';
+            if (key) property[key] = value || description;
         }
         result.property = property;
 
@@ -86,10 +87,14 @@ export async function writeDocumentsForRoomDetail(articleNo: number | string, co
         const office: RoomOffice = {
             name: dom.querySelector('.detail_agent_head .detail_head_title')?.text,
             tel:
-                Array.from(dom.querySelectorAll('.detail_contact_link.type_tel .detail_link_emphasis'))?.map(
-                    (el) => el.textContent
-                ) || [],
+                Array.from(dom.querySelectorAll('.detail_data_link.type_tel'))
+                    .map((el) => el.innerText)
+                    .filter((el) => /[0-9\-]+/.test(el)) || [],
         };
+        console.log(
+            '📱 공인중개사 전화번호',
+            Array.from(dom.querySelectorAll('.detail_data_link.type_tel')).map((el) => el.text)
+        );
         result.office = office;
 
         // 3. 방 내부 시설
