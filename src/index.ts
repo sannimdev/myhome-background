@@ -2,7 +2,7 @@ import { COLLECTION_ROOM, COLLECTION_ROOM_DELETED, configs, ICC_CHAT_ID } from '
 import { requestClusterList } from './data/request';
 import { diffTimes, sleep } from './lib/common';
 import { getKoreaTimezoneString, getUTCDate } from './lib/date';
-import { openMongo, closeMongo, getDeletedRooms, moveInDocuments } from './lib/mongo';
+import { openMongo, closeMongo, getDeletedRooms, moveInDocuments, getRooms, removeDocuments } from './lib/mongo';
 import { sendMessage } from './lib/telegram';
 import {
     cleanUpInvalidArticles,
@@ -83,13 +83,16 @@ async function runOnProduction() {
 }
 
 async function runOnLocalMachine() {
-    // try {
-    //     await cleanUpInvalidArticles();
-    //     // 오늘 삭제된 매물 가져와서 텔레그램 메시지 보내기
-    //     const startTime = getUTCDate();
-    //     const deletedRooms = await getTodayDeletedRooms(startTime, configs[0].filterFunction, 1);
-    //     await sendDeletedRoomTelegramMessage(deletedRooms, configs[0].chatId || '');
-    // } catch (e) {
-    //     console.error('runOnLocalMachine', e);
-    // }
+    try {
+        //     await cleanUpInvalidArticles();
+        //     // 오늘 삭제된 매물 가져와서 텔레그램 메시지 보내기
+        //     const startTime = getUTCDate();
+        //     const deletedRooms = await getTodayDeletedRooms(startTime, configs[0].filterFunction, 1);
+        //     await sendDeletedRoomTelegramMessage(deletedRooms, configs[0].chatId || '');
+        // const rooms: Room[] = (await getRooms()) as Room[];
+        // const pangyo = rooms.filter((room) => room?.address?.startsWith('경기도 성남시 분당구 백현동'));
+        // await removeDocuments(COLLECTION_ROOM, pangyo);
+    } catch (e) {
+        console.error('runOnLocalMachine', e);
+    }
 }

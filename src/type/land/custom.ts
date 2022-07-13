@@ -7,4 +7,10 @@ export type RoomDetail = {
     };
     images: string[];
     address?: string;
+    office: RoomOffice;
+};
+
+export type RoomOffice = {
+    name?: string | null;
+    tel?: (string | null)[];
 };

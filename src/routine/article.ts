@@ -22,6 +22,8 @@ export async function cleanUpInvalidArticles(): Promise<void> {
     }
     console.log(`✂️ 유효하지 않은 매물 ${invalidRooms.length}(/${rooms.length})개를 정리했습니다.`);
     console.log('===============================================');
+    if (!invalidRooms.length) return;
+
     const deletedRooms = invalidRooms.map((room) => ({ ...room, deletedAt: getUTCDate() }));
     await removeDocuments(COLLECTION_ROOM, invalidRooms);
     await addDocuments(COLLECTION_ROOM_DELETED, deletedRooms);
@@ -69,6 +71,7 @@ export async function sendNewRoomTelegramMessage(rooms: Room[], chatId: string) 
         floor: '층',
         moveInDate: '입주가능일',
         url: '링크',
+        introduction: '매물소개',
         created: '등록일(추정)',
         updated: '내용수정일(추정)',
     };
@@ -80,6 +83,7 @@ export async function sendNewRoomTelegramMessage(rooms: Room[], chatId: string) 
         price: room.prc / 10000 + '억',
         moveInDate: room.myhomeRoomDetail?.property['입주가능일'] || '',
         alpha: room.myhomeRoomDetail?.property['관리비'] || '',
+        introduction: room.myhomeRoomDetail?.property['매물소개'] || '',
         floor: room.flrInfo,
         url: `${NAVER_ARTICLE_DETAIL_URL}/${room.atclNo}`,
         created: getKoreaTimezoneString(room.createdAt),
@@ -121,6 +125,9 @@ export async function sendDeletedRoomTelegramMessage(rooms: Room[], chatId: stri
         price: '보증금',
         alpha: '관리비',
         moveInDate: '입주가능일',
+        introduction: '매물소개',
+        officeName: '업체명',
+        tel: '연락처',
         created: '등록일(추정)',
         deleted: '삭제일(추정)',
     };
@@ -134,8 +141,11 @@ export async function sendDeletedRoomTelegramMessage(rooms: Room[], chatId: stri
         price: room.prc / 10000 + '억',
         alpha: room.myhomeRoomDetail?.property['관리비'] || '',
         moveInDate: room.myhomeRoomDetail?.property['입주가능일'] || '',
+        introduction: room.myhomeRoomDetail?.property['매물소개'] || '',
         createdAt: room.createdAt,
         deletedAt: room.deletedAt,
+        officeName: room.myhomeRoomDetail?.office.name || '',
+        tel: room.myhomeRoomDetail?.office.tel?.join('\n'),
         created: getKoreaTimezoneString(room.createdAt),
         deleted: getKoreaTimezoneString(room.deletedAt),
     }));

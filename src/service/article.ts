@@ -4,7 +4,7 @@ import { IS_LOCAL_MACHINE } from '../data/environment';
 import { saveFile } from '../lib/file';
 import { getArticleDetail, getArticleDetailImages, getArticles } from '../lib/land';
 import { addDocuments, overwriteRooms, updateMyHomeRoomDetail } from '../lib/mongo';
-import { Room, RoomDetail, SearchArticleRequest } from '../type/land';
+import { Room, RoomDetail, RoomOffice, SearchArticleRequest } from '../type/land';
 
 export async function getArticleList(requestParam: SearchArticleRequest, maxPage = Number.MAX_SAFE_INTEGER) {
     try {
@@ -18,7 +18,7 @@ export async function getArticleList(requestParam: SearchArticleRequest, maxPage
                 console.log(`    🚚 매물 목록 중 ${page - 1}페이지 수집을 종료. ${page}페이지 정보를 수집합니다`);
                 await sleep(Math.round(Math.random() * 1000 + 500));
             } else {
-                console.log(`    🚧 ${requestParam.cortarNo} 매물 목록 수집을 종료합니다...`);
+                console.log(`    🚧 매물 목록 수집을 종료합니다...`);
                 break;
             }
         }
@@ -67,6 +67,7 @@ export async function writeDocumentsForRoomDetail(articleNo: number | string, co
             property: {},
             facility: {},
             images: [],
+            office: {},
         };
         const dom = parse(content);
 
@@ -81,7 +82,17 @@ export async function writeDocumentsForRoomDetail(articleNo: number | string, co
         }
         result.property = property;
 
-        // 2. 방 내부 시설
+        // 2. 부동산 업체 정보
+        const office: RoomOffice = {
+            name: dom.querySelector('.detail_agent_head .detail_head_title')?.text,
+            tel:
+                Array.from(dom.querySelectorAll('.detail_contact_link.type_tel .detail_link_emphasis'))?.map(
+                    (el) => el.textContent
+                ) || [],
+        };
+        result.office = office;
+
+        // 3. 방 내부 시설
         const getInnerText = (nodes: HTMLElement[]): string[] =>
             nodes.map((node) => node.innerText || '').filter((s) => !!s);
         const facilitiesNodes = dom.querySelectorAll('.detail_facilities');
@@ -102,11 +113,11 @@ export async function writeDocumentsForRoomDetail(articleNo: number | string, co
             });
         }
 
-        // 3. 이미지 파싱
+        // 4.  이미지 파싱
         result.images = await getDetailImages(articleNo);
         console.log('    ', JSON.stringify(result.images, null, 3));
 
-        // 4. 주소
+        // 5. 주소
         result.address = dom.querySelector('em.detail_info_branch')?.innerText.trim();
 
         IS_LOCAL_MACHINE
