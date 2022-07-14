@@ -2,7 +2,7 @@ import { Room } from '../type/land';
 
 export function getMyRoomFilterFunction(room: Room): boolean {
     return (
-        (room.prc <= 20000 &&
+        (room.prc <= 24000 &&
             room.myhomeRoomDetail?.address?.startsWith('경기도 성남시') &&
             room.tagList.includes('융자금없는') &&
             !room.flrInfo.startsWith('B1/') &&
