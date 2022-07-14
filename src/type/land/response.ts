@@ -7,6 +7,7 @@ export interface Room {
     updatedAt?: Date;
     deletedAt?: Date;
     myhomeRoomDetail?: RoomDetail;
+    address?: string;
 }
 
 // 매물 목록 응답

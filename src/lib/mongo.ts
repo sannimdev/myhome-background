@@ -45,8 +45,8 @@ export async function removeDocuments(collectionName: string, elements: any[]) {
             return true;
         });
     } catch (e) {
-        console.error('delete Document', e);
-        throw e;
+        console.error('failed to remove document...', e);
+        // throw e; 삭제 시에는 오류를 굳이 던질 필요 없을 듯...
     }
 }
 
@@ -56,7 +56,7 @@ export async function moveInDocuments(fromCollectionName: string, toCollectionNa
         await removeDocuments(fromCollectionName, elements);
     } catch (e) {
         console.error('moveInDocuments', e);
-        throw e;
+        // throw e;
     }
 }
 
@@ -151,6 +151,7 @@ export async function updateMyHomeRoomDetail(articleNo: number | string, myhomeR
                     {
                         $set: {
                             ...room,
+                            address: myhomeRoomDetail.address,
                             myhomeRoomDetail,
                             _id: room._id,
                             updatedAt: getUTCDate(),
