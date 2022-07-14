@@ -2,6 +2,8 @@ import dotenv from 'dotenv';
 import { parse } from 'path';
 import axios from 'axios';
 import { sleep } from './common';
+import { IS_LOCAL_MACHINE } from '../data/environment';
+import { DEV_CHAT_ID } from '../data/config';
 
 const { parsed: env } = dotenv.config({ path: `${parse(__dirname).dir}/../.env` });
 const TOKEN = env ? env.TELEGRAM_TOKEN : process.env.TELEGRAM_TOKEN;
@@ -19,7 +21,7 @@ export const sendMessage = async (chatId: string | number, message: string | num
 
         const url = getMessageApiUrl({
             token: TOKEN,
-            chatId: String(chatId),
+            chatId: String(IS_LOCAL_MACHINE ? DEV_CHAT_ID : chatId),
             message: encodeURI(String(message)),
         });
         const { data } = await axios.get(url);
