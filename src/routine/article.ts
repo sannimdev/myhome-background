@@ -1,5 +1,5 @@
 import { Room, SearchArticleRequest, SearchClusterList } from '../type/land';
-import { getDeletedRooms, getNewRooms, getRooms, overwriteRooms } from '../lib/mongo';
+import { addDocuments, getDeletedRooms, getNewRooms, getRooms, removeDocuments } from '../lib/mongo';
 import { getArticleDetail, getClusters } from '../lib/land';
 import { getDetail } from '../service/article';
 import { writeDocumentsForRoomDetail } from '../service/article';
@@ -9,6 +9,7 @@ import { NAVER_ARTICLE_DETAIL_URL } from '../util/naverland';
 import { sendMessage } from '../lib/telegram';
 import { getKoreaTimezoneString, getUTCDate } from '../lib/date';
 import { sleep } from '../lib/common';
+import { COLLECTION_ROOM, COLLECTION_ROOM_DELETED } from '../data/config';
 
 export async function cleanUpInvalidArticles(): Promise<void> {
     const rooms = ((await getRooms()) as Room[]).filter((room) => !room?.deletedAt);
@@ -21,7 +22,11 @@ export async function cleanUpInvalidArticles(): Promise<void> {
     }
     console.log(`✂️ 유효하지 않은 매물 ${invalidRooms.length}(/${rooms.length})개를 정리했습니다.`);
     console.log('===============================================');
-    await overwriteRooms(invalidRooms.map((room) => ({ ...room, deletedAt: getUTCDate() })) as Room[]);
+    if (!invalidRooms.length) return;
+
+    const deletedRooms = invalidRooms.map((room) => ({ ...room, deletedAt: getUTCDate() }));
+    await removeDocuments(COLLECTION_ROOM, invalidRooms);
+    await addDocuments(COLLECTION_ROOM_DELETED, deletedRooms);
 }
 
 export async function requestClusters(clusters: SearchClusterList[]): Promise<void> {
@@ -65,28 +70,34 @@ export async function sendNewRoomTelegramMessage(rooms: Room[], chatId: string) 
         area: '공급/전용면적',
         floor: '층',
         moveInDate: '입주가능일',
-        url: '링크',
+        officeName: '업체명',
+        tel: '연락처',
         created: '등록일(추정)',
         updated: '내용수정일(추정)',
+        url: '링크',
     };
-    const messageRooms = rooms.map((room): { [key: string]: string | Date | undefined } => ({
-        address: room.myhomeRoomDetail?.address || '주소 없음',
-        type: room.rletTpNm,
-        area: room.myhomeRoomDetail?.property['공급/전용면적'] || '',
-        name: room.atclNm,
-        price: room.prc / 10000 + '억',
-        moveInDate: room.myhomeRoomDetail?.property['입주가능일'] || '',
-        alpha: room.myhomeRoomDetail?.property['관리비'] || '',
-        floor: room.flrInfo,
-        url: `${NAVER_ARTICLE_DETAIL_URL}/${room.atclNo}`,
-        created: getKoreaTimezoneString(room.createdAt),
-        updated: getKoreaTimezoneString(room.updatedAt),
-    }));
+    const messageRooms = rooms.map((room): { [key: string]: string | Date | undefined } => {
+        return {
+            address: room.myhomeRoomDetail?.address || '주소 없음',
+            type: room.rletTpNm,
+            area: room.myhomeRoomDetail?.property['공급/전용면적'] || '',
+            name: room.atclNm,
+            price: room.prc / 10000 + '억',
+            moveInDate: room.myhomeRoomDetail?.property['입주가능일'] || '',
+            alpha: room.myhomeRoomDetail?.property['관리비'] || '',
+            floor: room.flrInfo,
+            officeName: room.myhomeRoomDetail?.office?.name || '',
+            tel: ['', ...(room.myhomeRoomDetail?.office?.tel || [])].join('\n'),
+            url: `${NAVER_ARTICLE_DETAIL_URL}/${room.atclNo}`,
+            created: getKoreaTimezoneString(room.createdAt),
+            updated: getKoreaTimezoneString(room.updatedAt),
+        };
+    });
     const length = messageRooms.length;
     let cnt = 0;
     for (const room of messageRooms) {
         const message = Object.keys(col).reduce((result, key) => {
-            return [...result, `${col[key]}: ${room[key]}`];
+            return room[key] ? [...result, `${col[key]}: ${room[key]}`] : [...result];
         }, [] as string[]);
         await sendMessage(chatId, message.join('\n'));
         console.log(`🏠 매물 ${++cnt}/${length} 건 메시지 전송 완료`);
@@ -118,29 +129,34 @@ export async function sendDeletedRoomTelegramMessage(rooms: Room[], chatId: stri
         price: '보증금',
         alpha: '관리비',
         moveInDate: '입주가능일',
+        officeName: '업체명',
+        tel: '연락처',
         created: '등록일(추정)',
         deleted: '삭제일(추정)',
     };
-    const messageRooms = rooms.map((room): { [key: string]: string | Date | undefined } => ({
-        address: room.myhomeRoomDetail?.address || '주소 없음',
-        no: room.atclNo,
-        name: room.atclNm,
-        type: room.rletTpNm,
-        area: room.myhomeRoomDetail?.property['공급/전용면적'] || '',
-        floor: room.flrInfo,
-        price: room.prc / 10000 + '억',
-        alpha: room.myhomeRoomDetail?.property['관리비'] || '',
-        moveInDate: room.myhomeRoomDetail?.property['입주가능일'] || '',
-        createdAt: room.createdAt,
-        deletedAt: room.deletedAt,
-        created: getKoreaTimezoneString(room.createdAt),
-        deleted: getKoreaTimezoneString(room.deletedAt),
-    }));
+    const messageRooms = rooms.map((room): { [key: string]: string | Date | undefined } => {
+        return {
+            address: room.myhomeRoomDetail?.address || '주소 없음',
+            no: room.atclNo,
+            name: room.atclNm,
+            type: room.rletTpNm,
+            area: room.myhomeRoomDetail?.property['공급/전용면적'] || '',
+            floor: room.flrInfo,
+            price: room.prc / 10000 + '억',
+            alpha: room.myhomeRoomDetail?.property['관리비'] || '',
+            moveInDate: room.myhomeRoomDetail?.property['입주가능일'] || '',
+            createdAt: room.createdAt,
+            deletedAt: room.deletedAt,
+            officeName: room.myhomeRoomDetail?.office?.name || '',
+            tel: room.myhomeRoomDetail?.office.tel?.join('\n'),
+            created: getKoreaTimezoneString(room.createdAt),
+            deleted: getKoreaTimezoneString(room.deletedAt),
+        };
+    });
     const length = messageRooms.length;
     console.log(messageRooms.length, '개의 유효하지 않은 매물...', messageRooms);
     let cnt = 0;
     for (const room of messageRooms) {
-        console.log(room.deletedAt, room.deleted);
         const message = Object.keys(col).reduce((result, key) => {
             return room[key] ? [...result, `${col[key]}: ${room[key]}`] : [...result];
         }, [] as string[]);

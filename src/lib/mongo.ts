@@ -3,7 +3,7 @@ import { Collection, Db, MongoClient } from 'mongodb';
 import dotenv from 'dotenv';
 import { Room, RoomDetail } from '../type/land';
 import { getUTCDate } from './date';
-import { COLLECTION_ROOM } from '../data/config';
+import { COLLECTION_ROOM, COLLECTION_ROOM_DELETED } from '../data/config';
 
 // Connection URL
 const { parsed: env } = dotenv.config({ path: `${parse(__dirname).dir}/../.env` });
@@ -24,7 +24,7 @@ export function accessMongo(collectionName: string, callback: (collection: Colle
     return callback(collection, db);
 }
 
-export async function addDocument(collectionName: string, elements: any[]) {
+export async function addDocuments(collectionName: string, elements: any[]) {
     try {
         return accessMongo(collectionName, async (collection) => collection.insertMany(elements));
     } catch (e) {
@@ -33,7 +33,7 @@ export async function addDocument(collectionName: string, elements: any[]) {
     }
 }
 
-export async function deleteDocuments(collectionName: string, elements: any[]) {
+export async function removeDocuments(collectionName: string, elements: any[]) {
     try {
         return accessMongo(collectionName, async (collection) => {
             const deletedResult = [];
@@ -45,8 +45,18 @@ export async function deleteDocuments(collectionName: string, elements: any[]) {
             return true;
         });
     } catch (e) {
-        console.error('delete Document', e);
-        throw e;
+        console.error('failed to remove document...', e);
+        // throw e; 삭제 시에는 오류를 굳이 던질 필요 없을 듯...
+    }
+}
+
+export async function moveInDocuments(fromCollectionName: string, toCollectionName: string, elements: any[]) {
+    try {
+        await addDocuments(toCollectionName, elements);
+        await removeDocuments(fromCollectionName, elements);
+    } catch (e) {
+        console.error('moveInDocuments', e);
+        // throw e;
     }
 }
 
@@ -70,7 +80,7 @@ export async function getNewRooms(currentDate: Date = getUTCDate(), hoursAgo: nu
 
 export async function getDeletedRooms(currentDate: Date = getUTCDate(), hoursAgo: number = 1): Promise<Room[] | Error> {
     try {
-        return accessMongo(COLLECTION_ROOM, (collection) => {
+        return accessMongo(COLLECTION_ROOM_DELETED, (collection) => {
             currentDate.setHours(currentDate.getHours() - hoursAgo, 0, 0, 0);
             return collection
                 .find({
@@ -141,6 +151,7 @@ export async function updateMyHomeRoomDetail(articleNo: number | string, myhomeR
                     {
                         $set: {
                             ...room,
+                            address: myhomeRoomDetail.address,
                             myhomeRoomDetail,
                             _id: room._id,
                             updatedAt: getUTCDate(),
