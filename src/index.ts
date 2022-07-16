@@ -46,8 +46,8 @@ async function runOnProduction() {
     console.time('runOnProduction');
     await sendMessage(ICC_CHAT_ID, `부동산 매물 최신화 작업을 시작합니다.\n${getKoreaTimezoneString(launchedTime)}`);
 
-    // 1. 유효하지 않은 매물 정리하기
-    console.log('유효하지 않은 매물 정리하기');
+    // 1. 중개가 종료된 매물 정리하기
+    console.log('중개가 종료된 매물 정리하기');
     await sendMessage(ICC_CHAT_ID, `✂️ 중개가 종료된 매물부터 정리하겠습니다.`);
     await cleanUpInvalidArticles();
 
@@ -68,10 +68,12 @@ async function runOnProduction() {
             await sendMessage(chatId, '🔍 매물을 추출하고 있어요.');
 
             // 오늘 삭제된 매물 가져와서 텔레그램 메시지 보내기
+            console.log(`[${id}] 😟 오늘 공고에서 내려간 매물을 찾고 있습니다`);
             const deletedRooms = await getTodayDeletedRooms(startTime, filterFunction, 1);
             await sendDeletedRoomTelegramMessage(deletedRooms, chatId);
 
             // 오늘 올라온 매물 가져와서 텔레그램 메시지 보내기
+            console.log(`[${id}]🚀 오늘 찾은 방을 텔레그램으로 전송하겠습니다`);
             const newRooms = await getTodayNewRooms(startTime, filterFunction, 1);
             await sendNewRoomTelegramMessage(newRooms, chatId);
 
