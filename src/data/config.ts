@@ -5,6 +5,7 @@ import { getBinRoomFilterFunction, getMyRoomFilterFunction, getYRoomFilterFuncti
 const { parsed: env } = dotenv.config({ path: `${parse(__dirname).dir}/../.env` });
 const getProcessEnv = (key: string) => (env ? env[key] : process.env[key]);
 export const ICC_CHAT_ID: string = getProcessEnv('TELEGRAM_CHAT_ID') || '';
+export const DEV_CHAT_ID: string = getProcessEnv('TELEGRAM_DEV_CHAT_ID') || '';
 export const COLLECTION_ROOM = 'room';
 export const COLLECTION_ROOM_DELETED = 'room_deleted';
 
@@ -13,6 +14,7 @@ type Config = {
     filterFunction: Function;
     chatId?: string;
 };
+
 export const configs: Config[] = [
     {
         id: 'MY',
