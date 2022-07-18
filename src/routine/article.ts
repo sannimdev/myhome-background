@@ -128,7 +128,7 @@ export async function sendDeletedRoomTelegramMessage(rooms: Room[], chatId: stri
 
     for (const room of messageRooms) {
         const message = Object.keys(col).reduce((result, key) => {
-            return room[key] ? [...result, `${col[key]}: ${room[key]}`] : [...result];
+            return room[key] && !['url'].includes(key) ? [...result, `${col[key]}: ${room[key]}`] : [...result];
         }, [] as string[]);
         const getTime = (date: Date | undefined) => getUTCDate(date || new Date(0)).getTime();
         const [deleted, created] = [getTime(room.deletedAt as Date), getTime(room.createdAt as Date)];
