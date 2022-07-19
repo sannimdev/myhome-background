@@ -75,7 +75,7 @@ const col: { [key: string]: string } = {
     officeName: '업체명',
     tel: '연락처',
     created: '등록일(추정)',
-    updated: '내용수정일(추정)',
+    updated: '갱신일(추정)',
     url: '링크',
 };
 
@@ -105,7 +105,13 @@ export async function sendNewRoomTelegramMessage(rooms: Room[], chatId: string, 
 
     for (const room of messageRooms) {
         const message = Object.keys(col).reduce((result, key) => {
-            return room[key] ? [...result, `${col[key]}: ${room[key]}`] : [...result];
+            const isValid = (room: MessageRoom, key: string): boolean => {
+                return (
+                    !room[key] || // Valid check
+                    (key === 'updated' && room['updated']?.toString() === room['created']?.toString()) // 등록일과 수정일이 같은 경우 등록일만 보여주기
+                );
+            };
+            return isValid(room, key) ? [...result, `${col[key]}: ${room[key]}`] : [...result];
         }, [] as string[]);
 
         await sendMessage(chatId, message.join('\n'));
