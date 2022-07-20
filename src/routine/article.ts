@@ -97,21 +97,23 @@ function getMessageRooms(rooms: Room[]): MessageRoom[] {
     })) as MessageRoom[];
 }
 
+function isValidMessageRooms(room: MessageRoom, key: string): boolean {
+    return !(
+        (
+            !room[key] || // Valid check
+            (key === 'updated' && room['updated']?.toString() === room['created']?.toString())
+        ) // 등록일과 수정일이 같은 경우 등록일만 보여주기
+    );
+}
+
 export async function sendNewRoomTelegramMessage(rooms: Room[], chatId: string, type: 'new' | 'deleted' = 'new') {
     // 메시지 만들기
     const messageRooms: MessageRoom[] = getMessageRooms(rooms);
     const length = messageRooms.length;
     let cnt = 0;
-
     for (const room of messageRooms) {
         const message = Object.keys(col).reduce((result, key) => {
-            const isValid = (room: MessageRoom, key: string): boolean => {
-                return (
-                    !room[key] || // Valid check
-                    (key === 'updated' && room['updated']?.toString() === room['created']?.toString()) // 등록일과 수정일이 같은 경우 등록일만 보여주기
-                );
-            };
-            return isValid(room, key) ? [...result, `${col[key]}: ${room[key]}`] : [...result];
+            return isValidMessageRooms(room, key) ? [...result, `${col[key]}: ${room[key]}`] : [...result];
         }, [] as string[]);
 
         await sendMessage(chatId, message.join('\n'));
@@ -134,7 +136,9 @@ export async function sendDeletedRoomTelegramMessage(rooms: Room[], chatId: stri
 
     for (const room of messageRooms) {
         const message = Object.keys(col).reduce((result, key) => {
-            return room[key] && !['url'].includes(key) ? [...result, `${col[key]}: ${room[key]}`] : [...result];
+            return isValidMessageRooms(room, key) && !['url'].includes(key)
+                ? [...result, `${col[key]}: ${room[key]}`]
+                : [...result];
         }, [] as string[]);
         const getTime = (date: Date | undefined) => getUTCDate(date || new Date(0)).getTime();
         const [deleted, created] = [getTime(room.deletedAt as Date), getTime(room.createdAt as Date)];
