@@ -76,6 +76,7 @@ const col: { [key: string]: string } = {
     tel: '연락처',
     created: '등록일(추정)',
     updated: '갱신일(추정)',
+    deleted: '삭제일(추정)',
     url: '링크',
 };
 
@@ -94,6 +95,7 @@ function getMessageRooms(rooms: Room[]): MessageRoom[] {
         url: `${NAVER_ARTICLE_DETAIL_URL}/${room.atclNo}`,
         created: getKoreaTimezoneString(room.createdAt),
         updated: getKoreaTimezoneString(room.updatedAt),
+        deleted: room?.deletedAt ? getKoreaTimezoneString(room.deletedAt) : '',
     })) as MessageRoom[];
 }
 
