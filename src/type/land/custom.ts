@@ -8,7 +8,7 @@ export type RoomDetail = {
     images: string[];
     address?: string;
     office: RoomOffice;
-    applicablePercentage?: number; // 보증금
+    applicablePercentage?: string; // 보증금 '89~92%' 이렇게 파싱..될 때도 있음
 };
 
 export type RoomOffice = {

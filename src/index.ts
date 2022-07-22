@@ -30,8 +30,8 @@ run();
 async function run() {
     try {
         await openMongo();
-        // await runOnProduction();
-        await runOnLocalMachine();
+        await runOnProduction();
+        // await runOnLocalMachine();
     } catch (e) {
         console.error('run()', e);
     } finally {
@@ -49,9 +49,9 @@ async function runOnProduction() {
     await sendMessage(ICC_CHAT_ID, `부동산 매물 최신화 작업을 시작합니다.\n${getKoreaTimezoneString(launchedTime)}`);
 
     // 1. 중개가 종료된 매물 정리하기
-    console.log('중개가 종료된 매물 정리하기');
-    await sendMessage(ICC_CHAT_ID, `✂️ 중개가 종료된 매물부터 정리하겠습니다.`);
-    await cleanUpInvalidArticles();
+    // console.log('중개가 종료된 매물 정리하기');
+    // await sendMessage(ICC_CHAT_ID, `✂️ 중개가 종료된 매물부터 정리하겠습니다.`);
+    // await cleanUpInvalidArticles();
 
     // // 2. 매물 목록 파싱하여 등록하기
     const targets = configs.map(({ id }) => id);

@@ -78,6 +78,7 @@ const col: { [key: string]: string } = {
     updated: '갱신일(추정)',
     deleted: '삭제일(추정)',
     url: '링크',
+    applicablePercentage: '전세가율',
 };
 
 function getMessageRooms(rooms: Room[]): MessageRoom[] {
@@ -96,6 +97,7 @@ function getMessageRooms(rooms: Room[]): MessageRoom[] {
         created: getKoreaTimezoneString(room.createdAt),
         updated: getKoreaTimezoneString(room.updatedAt),
         deleted: room?.deletedAt ? getKoreaTimezoneString(room.deletedAt) : '',
+        applicablePercentage: room.myhomeRoomDetail?.applicablePercentage || '',
     })) as MessageRoom[];
 }
 
