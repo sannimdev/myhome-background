@@ -73,7 +73,7 @@ export async function getArticleInitialRealTransactionPrice(
         const querystrings = [];
         for (const key of keys) {
             if (!params[key]) continue;
-            querystrings.push(`${encodeURI(key)}=${encode(params[key])}`);
+            querystrings.push(`${key}=${params[key]}`);
         }
         const querystring = querystrings.join('&');
         const url = `https://m.land.naver.com/mobile/api/mobile/articles/initial-real-transaction-price?${querystring}`;

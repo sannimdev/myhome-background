@@ -11,6 +11,7 @@ import {
 import { addDocuments, overwriteRooms, updateMyHomeRoomDetail } from '../lib/mongo';
 import { Room, RoomDetail, RoomOffice, SearchArticleRequest } from '../type/land';
 import { ArticleDetail } from '../data/article';
+import { createNoSubstitutionTemplateLiteral } from 'typescript';
 
 export async function getArticleList(requestParam: SearchArticleRequest, maxPage = Number.MAX_SAFE_INTEGER) {
     try {
@@ -136,23 +137,27 @@ export async function writeDocumentsForRoomDetail(articleNo: number | string, co
             .querySelector('.detail_data_applicable .detail_applicable_percentage .detail_percentage_price')
             ?.innerText?.trim();
 
-        // if (!ratioText) {
-        //     const articleDetail = parseArticleJson(content);
-        //     const hscpNo = articleDetail?.state?.article?.article?.hscpNo; // 건물 번호
-        //     const ptpNo = articleDetail?.state?.article?.article?.ptpNo; // 건물 내 단지 번호
-        //     if (hscpNo && ptpNo) {
-        //         const result = await getArticleInitialRealTransactionPrice(hscpNo, ptpNo);
-        //         const dealPrice = result?.dealTransactionPrice?.realTransactionPriceList[0]?.dealPrice;
-        //         const warrantPrice = articleDetail?.state?.article?.price?.warrantPrice;
-        //         ratioText = Math.round((warrantPrice / dealPrice) * 100) + '';
-        //     }
-        // }
+        // 네이버부동산에서 전세가율을 찾을 수 없으면 최신 거래가를 기준으로 파싱 시도하기
+        if (!ratioText) {
+            const articleDetail = parseArticleJson(content);
+            const hscpNo = articleDetail?.state?.article?.article?.hscpNo; // 건물 번호
+            const ptpNo = articleDetail?.state?.article?.article?.ptpNo; // 건물 내 단지 번호
+            if (hscpNo && ptpNo) {
+                const result = await getArticleInitialRealTransactionPrice(hscpNo, ptpNo);
+                const dealPrice = result?.dealTransactionPrice?.realTransactionPriceList[0]?.dealPrice;
+                const warrantPrice = articleDetail?.state?.article?.price?.warrantPrice;
+
+                if (dealPrice && warrantPrice) {
+                    ratioText = Math.round((warrantPrice / dealPrice) * 100) + '';
+                }
+            }
+            result.isCustomApplicablePercentage = true;
+        }
 
         result.applicablePercentage = ratioText || undefined;
 
-        IS_LOCAL_MACHINE
-            ? await saveFile(`article-detail-${articleNo}-${Date.now()}.json`, JSON.stringify(result, null, 3))
-            : await updateMyHomeRoomDetail(articleNo, result);
+        // IS_LOCAL_MACHINE ? await saveFile(`article-detail-${articleNo}-${Date.now()}.json`, JSON.stringify(result, null, 3)): await updateMyHomeRoomDetail(articleNo, result);
+        await updateMyHomeRoomDetail(articleNo, result);
 
         return true;
     } catch (e) {

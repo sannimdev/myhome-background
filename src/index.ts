@@ -3,7 +3,7 @@ import { requestClusterList } from './data/request';
 import { diffTimes, sleep } from './lib/common';
 import { getKoreaTimezoneString, getUTCDate } from './lib/date';
 import { saveFile } from './lib/file';
-import { getArticleDetail } from './lib/land';
+import { getArticleDetail, getArticleInitialRealTransactionPrice } from './lib/land';
 import {
     openMongo,
     closeMongo,
@@ -31,7 +31,7 @@ async function run() {
     try {
         await openMongo();
         await runOnProduction();
-        // await runOnLocalMachine();
+        // await runOnLotcalMachine();
     } catch (e) {
         console.error('run()', e);
     } finally {
@@ -49,11 +49,11 @@ async function runOnProduction() {
     await sendMessage(ICC_CHAT_ID, `부동산 매물 최신화 작업을 시작합니다.\n${getKoreaTimezoneString(launchedTime)}`);
 
     // 1. 중개가 종료된 매물 정리하기
-    // console.log('중개가 종료된 매물 정리하기');
-    // await sendMessage(ICC_CHAT_ID, `✂️ 중개가 종료된 매물부터 정리하겠습니다.`);
-    // await cleanUpInvalidArticles();
+    console.log('중개가 종료된 매물 정리하기');
+    await sendMessage(ICC_CHAT_ID, `✂️ 중개가 종료된 매물부터 정리하겠습니다.`);
+    await cleanUpInvalidArticles();
 
-    // // 2. 매물 목록 파싱하여 등록하기
+    // 2. 매물 목록 파싱하여 등록하기
     const targets = configs.map(({ id }) => id);
     await sendMessage(ICC_CHAT_ID, `⛹️‍♂️ 이제 매물을 최신화하겠습니다. (${targets.join(', ')})`);
     const parsingStartTime = getUTCDate();
@@ -61,6 +61,7 @@ async function runOnProduction() {
     const parsingDiff = diffTimes(parsingStartTime, getUTCDate());
     await sendMessage(ICC_CHAT_ID, `⏱️ 탐색하는 데 ${parsingDiff}!`);
 
+    // 3. 매물 추출하기
     for (const { id, filterFunction, chatId } of configs) {
         if (!filterFunction || !chatId) continue;
 
@@ -102,11 +103,14 @@ async function runOnLocalMachine() {
         //     await sendDeletedRoomTelegramMessage(deletedRooms, configs[0].chatId || '');
 
         // 새로운 방
-        const newRooms = await getTodayNewRooms(startTime, configs[0].filterFunction, 2);
-        await sendNewRoomTelegramMessage(newRooms, configs[0].chatId || '');
+        // const newRooms = await getTodayNewRooms(startTime, configs[0].filterFunction, 2);
+        // await sendNewRoomTelegramMessage(newRooms, configs[0].chatId || '');
 
-        const article = await getArticleDetail(2224902465);
-        await saveFile(`article-detail-${Date.now()}.html`, article);
+        // const article = await getArticleDetail(2224902465);
+        // await saveFile(`article-detail-${Date.now()}.html`, article);
+
+        const result = await getArticleInitialRealTransactionPrice(12484, 1);
+        console.log(result);
 
         // 방 검색
         // const rooms = (await getRooms()) as Room[];
