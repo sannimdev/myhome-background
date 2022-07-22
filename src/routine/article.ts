@@ -1,4 +1,4 @@
-import { Room, SearchArticleRequest, SearchClusterList } from '../type/land';
+import { MessageRoom, Room, SearchArticleRequest, SearchClusterList } from '../type/land';
 import { addDocuments, getDeletedRooms, getNewRooms, getRooms, removeDocuments } from '../lib/mongo';
 import { getArticleDetail, getClusters } from '../lib/land';
 import { getDetail } from '../service/article';
@@ -58,47 +58,68 @@ export async function getTodayNewRooms(currentDate: Date, roomFilterFunction: Fu
     return newRooms.filter((room) => roomFilterFunction(room));
 }
 
-export async function sendNewRoomTelegramMessage(rooms: Room[], chatId: string) {
-    console.log('🚀 결과를 텔레그램으로 전송하겠습니다.');
+export async function getTodayDeletedRooms(currentDate: Date, roomFilterFunction: Function, hoursAgo: number = 1) {
+    const deletedRooms = Array.prototype.slice.call(await getDeletedRooms(currentDate, hoursAgo)) as Room[];
+    return deletedRooms.filter((room) => roomFilterFunction(room));
+}
+
+const col: { [key: string]: string } = {
+    name: '이름',
+    price: '보증금',
+    alpha: '관리비',
+    address: '주소',
+    type: '유형',
+    area: '공급/전용면적',
+    floor: '층',
+    moveInDate: '입주가능일',
+    officeName: '업체명',
+    tel: '연락처',
+    created: '등록일(추정)',
+    updated: '갱신일(추정)',
+    deleted: '삭제일(추정)',
+    url: '링크',
+    applicablePercentage: '전세가율',
+};
+
+function getMessageRooms(rooms: Room[]): MessageRoom[] {
+    return rooms.map((room): { [key: string]: string | Date | undefined } => ({
+        address: room.myhomeRoomDetail?.address || '주소 없음',
+        type: room.rletTpNm,
+        area: room.myhomeRoomDetail?.property['공급/전용면적'] || '',
+        name: room.atclNm,
+        price: room.prc / 10000 + '억',
+        moveInDate: room.myhomeRoomDetail?.property['입주가능일'] || '',
+        alpha: room.myhomeRoomDetail?.property['관리비'] || '',
+        floor: room.flrInfo,
+        officeName: room.myhomeRoomDetail?.office?.name || '',
+        tel: ['', ...(room.myhomeRoomDetail?.office?.tel || [])].join('\n'),
+        url: `${NAVER_ARTICLE_DETAIL_URL}/${room.atclNo}`,
+        created: getKoreaTimezoneString(room.createdAt),
+        updated: getKoreaTimezoneString(room.updatedAt),
+        deleted: room?.deletedAt ? getKoreaTimezoneString(room.deletedAt) : '',
+        applicablePercentage: room.myhomeRoomDetail?.applicablePercentage || '',
+    })) as MessageRoom[];
+}
+
+function isValidMessageRooms(room: MessageRoom, key: string): boolean {
+    return !(
+        (
+            !room[key] || // Valid check
+            (key === 'updated' && room['updated']?.toString() === room['created']?.toString())
+        ) // 등록일과 수정일이 같은 경우 등록일만 보여주기
+    );
+}
+
+export async function sendNewRoomTelegramMessage(rooms: Room[], chatId: string, type: 'new' | 'deleted' = 'new') {
     // 메시지 만들기
-    const col: { [key: string]: string } = {
-        name: '이름',
-        price: '보증금',
-        alpha: '관리비',
-        address: '주소',
-        type: '유형',
-        area: '공급/전용면적',
-        floor: '층',
-        moveInDate: '입주가능일',
-        officeName: '업체명',
-        tel: '연락처',
-        created: '등록일(추정)',
-        updated: '내용수정일(추정)',
-        url: '링크',
-    };
-    const messageRooms = rooms.map((room): { [key: string]: string | Date | undefined } => {
-        return {
-            address: room.myhomeRoomDetail?.address || '주소 없음',
-            type: room.rletTpNm,
-            area: room.myhomeRoomDetail?.property['공급/전용면적'] || '',
-            name: room.atclNm,
-            price: room.prc / 10000 + '억',
-            moveInDate: room.myhomeRoomDetail?.property['입주가능일'] || '',
-            alpha: room.myhomeRoomDetail?.property['관리비'] || '',
-            floor: room.flrInfo,
-            officeName: room.myhomeRoomDetail?.office?.name || '',
-            tel: ['', ...(room.myhomeRoomDetail?.office?.tel || [])].join('\n'),
-            url: `${NAVER_ARTICLE_DETAIL_URL}/${room.atclNo}`,
-            created: getKoreaTimezoneString(room.createdAt),
-            updated: getKoreaTimezoneString(room.updatedAt),
-        };
-    });
+    const messageRooms: MessageRoom[] = getMessageRooms(rooms);
     const length = messageRooms.length;
     let cnt = 0;
     for (const room of messageRooms) {
         const message = Object.keys(col).reduce((result, key) => {
-            return room[key] ? [...result, `${col[key]}: ${room[key]}`] : [...result];
+            return isValidMessageRooms(room, key) ? [...result, `${col[key]}: ${room[key]}`] : [...result];
         }, [] as string[]);
+
         await sendMessage(chatId, message.join('\n'));
         console.log(`🏠 매물 ${++cnt}/${length} 건 메시지 전송 완료`);
         if (cnt % 10 === 0) {
@@ -111,54 +132,17 @@ export async function sendNewRoomTelegramMessage(rooms: Room[], chatId: string) 
     await sendMessage(chatId, resultMessage);
 }
 
-export async function getTodayDeletedRooms(currentDate: Date, roomFilterFunction: Function, hoursAgo: number = 1) {
-    const deletedRooms = Array.prototype.slice.call(await getDeletedRooms(currentDate, hoursAgo)) as Room[];
-    return deletedRooms.filter((room) => roomFilterFunction(room));
-}
-
 export async function sendDeletedRoomTelegramMessage(rooms: Room[], chatId: string) {
-    console.log('😟 오늘 공고에서 내려간 매물을 찾고 있습니다');
     // 메시지 만들기
-    const col: { [key: string]: string } = {
-        no: '매물번호',
-        address: '주소',
-        name: '이름',
-        type: '유형',
-        area: '공급/전용면적',
-        floor: '층',
-        price: '보증금',
-        alpha: '관리비',
-        moveInDate: '입주가능일',
-        officeName: '업체명',
-        tel: '연락처',
-        created: '등록일(추정)',
-        deleted: '삭제일(추정)',
-    };
-    const messageRooms = rooms.map((room): { [key: string]: string | Date | undefined } => {
-        return {
-            address: room.myhomeRoomDetail?.address || '주소 없음',
-            no: room.atclNo,
-            name: room.atclNm,
-            type: room.rletTpNm,
-            area: room.myhomeRoomDetail?.property['공급/전용면적'] || '',
-            floor: room.flrInfo,
-            price: room.prc / 10000 + '억',
-            alpha: room.myhomeRoomDetail?.property['관리비'] || '',
-            moveInDate: room.myhomeRoomDetail?.property['입주가능일'] || '',
-            createdAt: room.createdAt,
-            deletedAt: room.deletedAt,
-            officeName: room.myhomeRoomDetail?.office?.name || '',
-            tel: room.myhomeRoomDetail?.office.tel?.join('\n'),
-            created: getKoreaTimezoneString(room.createdAt),
-            deleted: getKoreaTimezoneString(room.deletedAt),
-        };
-    });
+    const messageRooms: MessageRoom[] = getMessageRooms(rooms);
     const length = messageRooms.length;
-    console.log(messageRooms.length, '개의 유효하지 않은 매물...', messageRooms);
     let cnt = 0;
+
     for (const room of messageRooms) {
         const message = Object.keys(col).reduce((result, key) => {
-            return room[key] ? [...result, `${col[key]}: ${room[key]}`] : [...result];
+            return isValidMessageRooms(room, key) && !['url'].includes(key)
+                ? [...result, `${col[key]}: ${room[key]}`]
+                : [...result];
         }, [] as string[]);
         const getTime = (date: Date | undefined) => getUTCDate(date || new Date(0)).getTime();
         const [deleted, created] = [getTime(room.deletedAt as Date), getTime(room.createdAt as Date)];
@@ -173,6 +157,6 @@ export async function sendDeletedRoomTelegramMessage(rooms: Room[], chatId: stri
         console.log(`❌ 유효하지 않은 매물 ${++cnt}/${length} 건 메시지 전송 완료`);
     }
     if (length) {
-        await sendMessage(chatId, `🥲 아쉽게 놓친 매물 ${length}건을 찾았어요. 매물 회전율을 살펴볼까요?`);
+        await sendMessage(chatId, `🥲 아쉽게 놓친 매물 ${length}건을 찾았어요.\n매물 회전율을 살펴볼까요?`);
     }
 }

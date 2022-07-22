@@ -1,4 +1,6 @@
 import axios, { AxiosResponse } from 'axios';
+import { encode } from 'punycode';
+import { TransactionPriceResponse } from '../data/transactionPrice';
 import { ArticleInClusterList, ArticleResponse, Room, SearchArticleRequest, SearchClusterList } from '../type/land';
 import {
     getArticleDetailUrl,
@@ -55,6 +57,27 @@ export async function getArticleDetailImages(articleNo: number | string) {
         const response = await axios.get(url, {
             headers,
         });
+        return response.data;
+    } catch (e) {
+        throw e;
+    }
+}
+
+export async function getArticleInitialRealTransactionPrice(
+    hscpNo: number | string,
+    ptpNo: number | string
+): Promise<TransactionPriceResponse> {
+    try {
+        const params: { [key: string]: string } = { hscpNo: String(hscpNo), ptpNo: String(ptpNo) };
+        const keys = Object.keys(params);
+        const querystrings = [];
+        for (const key of keys) {
+            if (!params[key]) continue;
+            querystrings.push(`${encodeURI(key)}=${encode(params[key])}`);
+        }
+        const querystring = querystrings.join('&');
+        const url = `https://m.land.naver.com/mobile/api/mobile/articles/initial-real-transaction-price?${querystring}`;
+        const response = await axios.get(url, { headers });
         return response.data;
     } catch (e) {
         throw e;

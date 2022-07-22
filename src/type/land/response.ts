@@ -8,7 +8,27 @@ export interface Room {
     deletedAt?: Date;
     myhomeRoomDetail?: RoomDetail;
     address?: string;
+    percentageApplicable?: number;
 }
+
+export type MessageRoom = {
+    [key: string]: string | Date;
+    address: string;
+    type: string;
+    area: string;
+    name: string;
+    price: string;
+    moveInDate: string;
+    alpha: string;
+    floor: string;
+    officeNmae: string;
+    tel: string;
+    url: string;
+    created: Date;
+    deleted: Date;
+    createdAt: Date;
+    deletedAt: Date;
+};
 
 // 매물 목록 응답
 export interface ArticleResponse {
