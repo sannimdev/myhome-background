@@ -148,10 +148,7 @@ export async function writeDocumentsForRoomDetail(articleNo: number | string, co
         //     }
         // }
 
-        const applicablePercentage = parseInt((ratioText || '').replace(/[^0-9]/g, '')) || null;
-        if (applicablePercentage) {
-            result.applicablePercentage = applicablePercentage * 0.01;
-        }
+        result.applicablePercentage = ratioText || undefined;
 
         IS_LOCAL_MACHINE
             ? await saveFile(`article-detail-${articleNo}-${Date.now()}.json`, JSON.stringify(result, null, 3))

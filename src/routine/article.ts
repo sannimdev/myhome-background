@@ -63,8 +63,10 @@ export async function getTodayDeletedRooms(currentDate: Date, roomFilterFunction
     return deletedRooms.filter((room) => roomFilterFunction(room));
 }
 
+// 메시지 출력 순서는 col의 key 선언 순서와 같다
 const col: { [key: string]: string } = {
     name: '이름',
+    applicablePercentage: '전세가율',
     price: '보증금',
     alpha: '관리비',
     address: '주소',
@@ -96,6 +98,7 @@ function getMessageRooms(rooms: Room[]): MessageRoom[] {
         created: getKoreaTimezoneString(room.createdAt),
         updated: getKoreaTimezoneString(room.updatedAt),
         deleted: room?.deletedAt ? getKoreaTimezoneString(room.deletedAt) : '',
+        applicablePercentage: room.myhomeRoomDetail?.applicablePercentage || '',
     })) as MessageRoom[];
 }
 
