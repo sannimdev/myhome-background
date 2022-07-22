@@ -2,6 +2,8 @@ import { COLLECTION_ROOM, COLLECTION_ROOM_DELETED, configs, ICC_CHAT_ID } from '
 import { requestClusterList } from './data/request';
 import { diffTimes, sleep } from './lib/common';
 import { getKoreaTimezoneString, getUTCDate } from './lib/date';
+import { saveFile } from './lib/file';
+import { getArticleDetail } from './lib/land';
 import {
     openMongo,
     closeMongo,
@@ -28,8 +30,8 @@ run();
 async function run() {
     try {
         await openMongo();
-        await runOnProduction();
-        // await runOnLocalMachine();
+        // await runOnProduction();
+        await runOnLocalMachine();
     } catch (e) {
         console.error('run()', e);
     } finally {
@@ -102,6 +104,9 @@ async function runOnLocalMachine() {
         // 새로운 방
         const newRooms = await getTodayNewRooms(startTime, configs[0].filterFunction, 2);
         await sendNewRoomTelegramMessage(newRooms, configs[0].chatId || '');
+
+        const article = await getArticleDetail(2224902465);
+        await saveFile(`article-detail-${Date.now()}.html`, article);
 
         // 방 검색
         // const rooms = (await getRooms()) as Room[];

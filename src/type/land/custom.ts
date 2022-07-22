@@ -8,6 +8,7 @@ export type RoomDetail = {
     images: string[];
     address?: string;
     office: RoomOffice;
+    applicablePercentage?: number; // 보증금
 };
 
 export type RoomOffice = {

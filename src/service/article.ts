@@ -2,9 +2,15 @@ import { parse, HTMLElement } from 'node-html-parser';
 import { sleep } from '../lib/common';
 import { IS_LOCAL_MACHINE } from '../data/environment';
 import { saveFile } from '../lib/file';
-import { getArticleDetail, getArticleDetailImages, getArticles } from '../lib/land';
+import {
+    getArticleDetail,
+    getArticleDetailImages,
+    getArticleInitialRealTransactionPrice,
+    getArticles,
+} from '../lib/land';
 import { addDocuments, overwriteRooms, updateMyHomeRoomDetail } from '../lib/mongo';
 import { Room, RoomDetail, RoomOffice, SearchArticleRequest } from '../type/land';
+import { ArticleDetail } from '../data/article';
 
 export async function getArticleList(requestParam: SearchArticleRequest, maxPage = Number.MAX_SAFE_INTEGER) {
     try {
@@ -125,6 +131,28 @@ export async function writeDocumentsForRoomDetail(articleNo: number | string, co
         // 5. 주소
         result.address = dom.querySelector('em.detail_info_branch')?.innerText.trim();
 
+        // 6. 전세가율 파싱
+        let ratioText = dom
+            .querySelector('.detail_data_applicable .detail_applicable_percentage .detail_percentage_price')
+            ?.innerText?.trim();
+
+        // if (!ratioText) {
+        //     const articleDetail = parseArticleJson(content);
+        //     const hscpNo = articleDetail?.state?.article?.article?.hscpNo; // 건물 번호
+        //     const ptpNo = articleDetail?.state?.article?.article?.ptpNo; // 건물 내 단지 번호
+        //     if (hscpNo && ptpNo) {
+        //         const result = await getArticleInitialRealTransactionPrice(hscpNo, ptpNo);
+        //         const dealPrice = result?.dealTransactionPrice?.realTransactionPriceList[0]?.dealPrice;
+        //         const warrantPrice = articleDetail?.state?.article?.price?.warrantPrice;
+        //         ratioText = Math.round((warrantPrice / dealPrice) * 100) + '';
+        //     }
+        // }
+
+        const applicablePercentage = parseInt((ratioText || '').replace(/[^0-9]/g, '')) || null;
+        if (applicablePercentage) {
+            result.applicablePercentage = applicablePercentage * 0.01;
+        }
+
         IS_LOCAL_MACHINE
             ? await saveFile(`article-detail-${articleNo}-${Date.now()}.json`, JSON.stringify(result, null, 3))
             : await updateMyHomeRoomDetail(articleNo, result);
@@ -133,5 +161,17 @@ export async function writeDocumentsForRoomDetail(articleNo: number | string, co
     } catch (e) {
         console.error('writeDocumentsForRoomDetail', e);
         throw e;
+    }
+}
+
+const START_APP = '<script>window.App=';
+const END_APP = '</script>';
+function parseArticleJson(response: string): ArticleDetail | null {
+    try {
+        const content = response.split(START_APP)[1];
+        return JSON.parse(content.split(END_APP)[0]) as ArticleDetail;
+    } catch (e) {
+        console.error(e);
+        return null;
     }
 }

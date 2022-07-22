@@ -8,6 +8,7 @@ export interface Room {
     deletedAt?: Date;
     myhomeRoomDetail?: RoomDetail;
     address?: string;
+    percentageApplicable?: number;
 }
 
 export type MessageRoom = {
