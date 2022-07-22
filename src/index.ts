@@ -2,6 +2,8 @@ import { COLLECTION_ROOM, COLLECTION_ROOM_DELETED, configs, ICC_CHAT_ID } from '
 import { requestClusterList } from './data/request';
 import { diffTimes, sleep } from './lib/common';
 import { getKoreaTimezoneString, getUTCDate } from './lib/date';
+import { saveFile } from './lib/file';
+import { getArticleDetail } from './lib/land';
 import {
     openMongo,
     closeMongo,
@@ -47,9 +49,9 @@ async function runOnProduction() {
     await sendMessage(ICC_CHAT_ID, `부동산 매물 최신화 작업을 시작합니다.\n${getKoreaTimezoneString(launchedTime)}`);
 
     // 1. 중개가 종료된 매물 정리하기
-    console.log('중개가 종료된 매물 정리하기');
-    await sendMessage(ICC_CHAT_ID, `✂️ 중개가 종료된 매물부터 정리하겠습니다.`);
-    await cleanUpInvalidArticles();
+    // console.log('중개가 종료된 매물 정리하기');
+    // await sendMessage(ICC_CHAT_ID, `✂️ 중개가 종료된 매물부터 정리하겠습니다.`);
+    // await cleanUpInvalidArticles();
 
     // // 2. 매물 목록 파싱하여 등록하기
     const targets = configs.map(({ id }) => id);
@@ -69,12 +71,12 @@ async function runOnProduction() {
 
             // 오늘 삭제된 매물 가져와서 텔레그램 메시지 보내기
             console.log(`[${id}] 😟 오늘 공고에서 내려간 매물을 찾고 있습니다`);
-            const deletedRooms = await getTodayDeletedRooms(startTime, filterFunction, 1);
+            const deletedRooms = await getTodayDeletedRooms(startTime, filterFunction, 24);
             await sendDeletedRoomTelegramMessage(deletedRooms, chatId);
 
             // 오늘 올라온 매물 가져와서 텔레그램 메시지 보내기
             console.log(`[${id}]🚀 오늘 찾은 방을 텔레그램으로 전송하겠습니다`);
-            const newRooms = await getTodayNewRooms(startTime, filterFunction, 1);
+            const newRooms = await getTodayNewRooms(startTime, filterFunction, 24);
             await sendNewRoomTelegramMessage(newRooms, chatId);
 
             sleep(5000); // 텔레그램 메시지 전송 제약으로 인해 쉬어 감.
@@ -102,6 +104,9 @@ async function runOnLocalMachine() {
         // 새로운 방
         const newRooms = await getTodayNewRooms(startTime, configs[0].filterFunction, 2);
         await sendNewRoomTelegramMessage(newRooms, configs[0].chatId || '');
+
+        const article = await getArticleDetail(2224902465);
+        await saveFile(`article-detail-${Date.now()}.html`, article);
 
         // 방 검색
         // const rooms = (await getRooms()) as Room[];
